@@ -20,6 +20,10 @@ io.setmode(io.BCM)              # modo in/out pin del micro
 io.setwarnings(False)           # no señala advertencias de pin ya usados
 io.setup(out1,io.OUT)           # configura en el micro las salidas
 TipoPromocion = 1
+
+
+p = Usb(0x04b8, 0x0202, 0)
+
 class FormularioOperacion:
     def __init__(self):
         #creamos un objeto que esta en el archivo operacion dentro la clase Operacion
@@ -105,8 +109,8 @@ class FormularioOperacion:
         img.save(f)
         f.close()
         #aqui lo imprimimos
-        p = Usb(0x04b8, 0x0202, 0)
-        #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
+
+
         p.set("center")
         p.text("BOLETO PARABRISAS\n")
         folioZZ=('FOLIO 000' + masuno)
@@ -290,8 +294,8 @@ class FormularioOperacion:
            self.label9.configure(text =(importe, "cobro"))
            self.PrTi.set("Per")
            self.Comprobante()
-           p = Usb(0x04b8, 0x0202, 0)
-           #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
+
+
            p.text('Boleto Perdido\n')
            FoliodelPerdido = str(self.PonerFOLIO.get(),)
            p.text('Folio boleto cancelado: '+FoliodelPerdido+'\n')
@@ -489,8 +493,7 @@ class FormularioOperacion:
         io.output(out1,1) 
 
     def Comprobante(self):
-        p = Usb(0x04b8, 0x0202, 0)
-        #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
+
         p.text("Comprobante de pago\n")
         p.image("LOGO1.jpg")
         #Compro de comprobante
@@ -894,8 +897,8 @@ class FormularioOperacion:
 #        respuesta=self.operacion1.desglose_cobrados()
         self.scrolledtxt2.delete("1.0", tk.END)
         #mb.showinfo("respuesta", respuesta)
-        p = Usb(0x04b8, 0x0202, 0)
-        #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
+
+
         p.text("El Numero de corte es "+Numcorte+'\n')
         for fila in respuesta:
             self.scrolledtxt2.insert(tk.END, "Son: "+str(fila[0])+" Boletos "+str(fila[1])+"\nCon valor de :$"+str(fila[2])+"\nTotal $"+str(fila[3])+"\n\n")
@@ -946,8 +949,8 @@ class FormularioOperacion:
            self.label9.configure(text =(importe, "cobro"))
            self.PrTi.set("CDO")
            self.promo.set("")
-           p = Usb(0x04b8, 0x0202, 0)
-           #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
+
+
            p.text('Boleto Cancelado\n')
            FoliodelCancelado = str(self.FolioCancelado.get(),)
            p.text('Folio boleto cancelado: '+FoliodelCancelado+'\n')
@@ -981,8 +984,8 @@ class FormularioOperacion:
         #respuesta=str(respuesta)
         for fila in respuesta:
             self.scrolledtext1.insert(tk.END, "Entrada num: "+str(fila[0])+"\nEntro: "+str(fila[1])+"\nSalio: "+str(fila[2])+"\nImporte: "+str(fila[3])+"\n\n")
-            p = Usb(0x04b8, 0x0202, 0)
-            #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
+
+
             p.text('Entrada Num :')
             p.text(str(fila[0]))
             p.text('\n')
@@ -1066,8 +1069,8 @@ class FormularioOperacion:
         vobo = "cor"#este es para que la instruccion no marque error
         ActEntradas = (maxnum, vobo )
         self.label4.configure(text=("Numero de corte",maxnum))
-        p = Usb(0x04b8, 0x0202, 0)
-        #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
+
+
         p.text(" Est DURANGO CORTE Num "+maxnum+"\n")
         #p.text("CORTE Num "+maxnum+"\n")
         p.text('IMPORTE: $ '+Im38+'\n')
@@ -1142,9 +1145,8 @@ class FormularioOperacion:
         io.output(out1,1) 
         respuesta=self.operacion1.desglose_cobrados(Numcorte)
         self.scrolledtxt2.delete("1.0", tk.END)
-        #mb.showinfo("respuesta", respuesta)
-        p = Usb(0x04b8, 0x0202, 0)
-        #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
+
+
         p.text("Cantidad e Importes "+'\n')
         p.text("Cantidad - Tarifa - valor C/U - Total "+'\n')
         for fila in respuesta:
@@ -1169,7 +1171,7 @@ class FormularioOperacion:
         #ser.write(str(entrada).encode())  
     def Cerrar_Programa(self):
         self.ventana1.destroy()        
-####nuevo 19abr22
+    ####nuevo 19abr22
     def Reporte_Corte(self):
         contrasena = simpledialog.askinteger("Contrasena", "Capture su Contrasena:",
                                  parent=self.labelframe4) # minvalue=8, maxvalue=8
@@ -1325,37 +1327,11 @@ class FormularioOperacion:
 
         
     def Puertoycontar(self):
-        #ser = serial.Serial('/dev/ttyAMA0', 9600)
-        #Enviamos el caracter por serial, codificado en Unicode
-        #entrada='e'
-        #ser.write(str(entrada).encode())
-        #Leemos lo que hay en el puerto y quitamos lo que no queremos
-        #sArduino = str(ser.readline())
-        #sArduino = "" .join([x for x in sArduino if x.isdigit()])#esto es para solo poner numeros
-        #CuantosEntradas=str(self.operacion1.EntradasSensor())
-        #sArduino = 1
-        #CuantosEntradas = CuantosEntradas.strip('(),')
-        #self.SensorEntrada.set(CuantosEntradas)
-        #entrada='a'
-        #ser.write(str(entrada).encode())
-        #Leemos lo que hay en el puerto y quitamos lo que no queremos
-        #sArduino = str(ser.readline())
-        #sArduino = "" .join([x for x in sArduino if x.isdigit()])#esto es para solo poner num
-        #CuantosSalidas=str(self.operacion1.SalidasSensor())
-        #sArduino =1
-        #CuantosSalidas = CuantosSalidas.strip('(),')
-        #self.SalidaAutos.set(CuantosSalidas)
-        #EntradasSen = int(self.SensorEntrada.get(),)
-        #SalidasSen =  int(self.SalidaAutos.get(),)
+
         CuantosBoletosCobro=str(self.operacion1.CuantosBoletosCobro())
         CuantosBoletosCobro = CuantosBoletosCobro.strip('(),')
         self.BoletosCobrados.set(CuantosBoletosCobro)
-        #BEDCorte=str(self.operacion1.BEDCorte())
-        #BEDCorte = BEDCorte.strip('(),')
-        #self.BEDespuesCorte.set(BEDCorte)
-        #BAnteriores=str(self.operacion1.BAnteriores())
-        #BAnteriores = BAnteriores.strip('(),')
-        #self.BAnteriores.set(BAnteriores)
+
         MaxFolioCorte=str(self.operacion1.Maxfolio_Cortes())
         MaxFolioCorte=MaxFolioCorte.strip('(),')
         QuedadosBol=str(self.operacion1.Quedados_Sensor(MaxFolioCorte))
@@ -1378,8 +1354,6 @@ class FormularioOperacion:
         dentroCorte = dentroCorte.strip('(),')
         self.BDentro.set(CuantosAutosdentro)
         self.Autos_Anteriores.set(dentroCorte)
-        #AutosAnteriores = int(self.Autos_Anteriores.get(),)
-        #Cuantos_hay_dentro = ((AutosAnteriores + EntradasSen) - SalidasSen)
-        #self.AutosEnEstacionamiento.set(Cuantos_hay_entro)
+
 
 aplicacion1=FormularioOperacion()
