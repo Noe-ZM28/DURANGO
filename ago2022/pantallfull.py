@@ -76,8 +76,8 @@ class Fullscreen_Example:
                    self.operacion1.ActuaizaUsuario(actual)
                    ##Cerrar la ventana
                    self.quitF()
-                   from mrz2022 import FormularioOperacion       
-                   FormularioOperacion(self)
+                   from cobro import FormularioOperacion       
+                   FormularioOperacion()
                    
 
                 else:
