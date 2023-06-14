@@ -1089,7 +1089,7 @@ class FormularioOperacion:
             p.text('\n')
   
         else:
-            passp.cut()
+            p.cut()
 
 
     def BoletoCancelado(self):
