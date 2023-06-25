@@ -24,6 +24,8 @@ TipoPromocion = 1
 ###--###
 p = Usb(0x04b8, 0x0202, 0)
 penalizacion_con_importe = True
+from view_login import View_Login
+
 
 class FormularioOperacion:
     def __init__(self):
@@ -1051,6 +1053,18 @@ class FormularioOperacion:
         self.boton6=tk.Button(self.labelframe5, text="Reporte de Corte", command=self.Reporte_Corte, width=15, height=1, anchor="center", background="red")
         self.boton6.grid(column=3, row=2, padx=4, pady=4)       
 
+        self.seccion_boton_usuario = ttk.LabelFrame(self.pagina3, text='Administrar usuarios')
+        self.seccion_boton_usuario.grid(row=3, column=1, padx=10, pady=10)
+
+        self.boton_usuarios=tk.Button(self.seccion_boton_usuario, text="Entrar",	 
+        command=lambda:{
+                self.desactivar(),
+                View_Login(),
+                self.activar()
+                },
+        width=15, height=1, anchor="center", background="red")
+        self.boton_usuarios.grid(column=0, row=0, padx=4, pady=4)  
+
 
     def BoletoDentro2(self):
         respuesta=self.operacion1.Autos_dentro()
@@ -1652,7 +1666,31 @@ class FormularioOperacion:
             self.folio.set("")
             self.entryfolio.focus()
 
+    def desactivar(self):
+        """
+        Desactiva los botones de la interface
+    
+        :param None: 
 
+        :raises None: 
+
+        :return:
+            - None
+        """
+        self.ventana1.withdraw()  # oculta la ventana
+
+    def activar(self):
+        """
+        Activa los botones de la interface
+
+        :param None: 
+
+        :raises None: 
+
+        :return:
+            - None
+        """
+        self.ventana1.deiconify()
 
 
 
