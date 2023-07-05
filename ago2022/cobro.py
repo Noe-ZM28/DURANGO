@@ -99,7 +99,6 @@ class FormularioOperacion:
         self.operacion1.generar_QR(folio_cifrado)
 
         fechaEntro = datetime.today()
-        fechaEntro = fechaEntro - timedelta(seconds = fechaEntro.second)
 
         horaentrada = str(fechaEntro)
         horaentrada=horaentrada[:19]
@@ -356,8 +355,6 @@ class FormularioOperacion:
             date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
             date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
             
-            fechaActual = fechaActual - timedelta(seconds = fechaActual.second)
-
             # Calcular la diferencia entre la fecha actual y la fecha del boleto perdido
             ffeecha = fechaActual - date_time_mod2
 
@@ -539,8 +536,6 @@ class FormularioOperacion:
             fecha1= fecha.strftime("%Y-%m-%d %H:%M:%S")
             fechaActual= datetime.strptime(fecha1, '%Y-%m-%d %H:%M:%S')
 
-            fechaActual = fechaActual - timedelta(seconds = fechaActual.second)
-            fechaActual = fechaActual + timedelta(minutes = 1)
 
             fechaActual= datetime.strptime(fecha1, '%Y-%m-%d %H:%M:%S')
             self.copia.set(fechaActual)
@@ -576,14 +571,12 @@ class FormularioOperacion:
             self.ffeecha.set(ffeecha)
             self.ffeecha_auxiliar.set(self.ffeecha.get()[:-3])
 
-            if minutos_dentro < 15 and minutos_dentro  >= 0:
-                minutos = 1
-            if minutos_dentro < 30 and minutos_dentro  >= 15:
-                minutos = 2
-            if minutos_dentro < 45 and minutos_dentro  >= 30:
-                minutos = 3
-            if minutos_dentro <= 59 and minutos_dentro  >= 45:
-                minutos = 4
+            if minutos_dentro == 0: minutos = 0
+            elif minutos_dentro < 16 and minutos_dentro >= 1: minutos = 1
+            elif minutos_dentro < 31 and minutos_dentro >= 16: minutos = 2
+            elif minutos_dentro < 46 and minutos_dentro >= 31: minutos = 3
+            elif minutos_dentro <= 59 and minutos_dentro >= 46: minutos = 4
+
             if ffeecha.days == 0 and horas_dentro == 0:
                importe = 30
                self.importe.set(importe)
@@ -733,8 +726,6 @@ class FormularioOperacion:
                    fecha1= fecha.strftime("%Y-%m-%d %H:%M:%S")
 
                    fechaActual= datetime.strptime(fecha1, '%Y-%m-%d %H:%M:%S')
-                   fechaActual = fechaActual - timedelta(seconds = fechaActual.second)
-                   fechaActual = fechaActual + timedelta(minutes = 1)
 
                    date_time_str=str(self.descripcion.get())
                    date_time_obj= datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
@@ -773,8 +764,7 @@ class FormularioOperacion:
                    date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
                    date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
                    
-                   fechaActual = fechaActual - timedelta(seconds = fechaActual.second)
-                   fechaActual = fechaActual + timedelta(minutes = 1)
+
 
                    ffeecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffeecha.days, "dias"))
                    segundos_vividos = ffeecha.seconds
@@ -808,8 +798,7 @@ class FormularioOperacion:
                    date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
                    date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
                    
-                   fechaActual = fechaActual - timedelta(seconds = fechaActual.second)
-                   fechaActual = fechaActual + timedelta(minutes = 1)
+
 
                    ffeecha = fechaActual - date_time_mod2
                    segundos_vividos = ffeecha.seconds
@@ -855,8 +844,7 @@ class FormularioOperacion:
                    date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
                    date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
 
-                   fechaActual = fechaActual - timedelta(seconds = fechaActual.second)
-                   fechaActual = fechaActual + timedelta(minutes = 1)
+
 
                    ffeecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffeecha.days, "dias"))
                    segundos_vividos = ffeecha.seconds
@@ -892,8 +880,7 @@ class FormularioOperacion:
                    date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
                    date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
 
-                   fechaActual = fechaActual - timedelta(seconds = fechaActual.second)
-                   fechaActual = fechaActual + timedelta(minutes = 1)
+
 
                    ffeecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffeecha.days, "dias"))
                    segundos_vividos = ffeecha.seconds
@@ -1158,8 +1145,7 @@ class FormularioOperacion:
                 date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
                 date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
                 
-                fechaActual = fechaActual - timedelta(seconds = fechaActual.second)
-                fechaActual = fechaActual + timedelta(minutes = 1)
+
 
                 ffecha = fechaActual - date_time_mod2
                 segundos_vividos = ffecha.seconds
