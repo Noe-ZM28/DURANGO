@@ -14,14 +14,9 @@ import xlsxwriter
 import operacion
 import time
 import serial
-import RPi.GPIO as io
-out1 = 17
-io.setmode(io.BCM)              # modo in/out pin del micro
-io.setwarnings(False)           # no señala advertencias de pin ya usados
-io.setup(out1,io.OUT)           # configura en el micro las salidas
 TipoPromocion = 1
 
-###--###
+###-###
 p = Usb(0x04b8, 0x0202, 0)
 penalizacion_con_importe = True
 from view_login import View_Login
@@ -29,6 +24,7 @@ from view_login import View_Login
 
 class FormularioOperacion:
     def __init__(self):
+        self.folio_auxiliar = None
         #creamos un objeto que esta en el archivo operacion dentro la clase Operacion
         self.operacion1=operacion.Operacion()
         self.ventana1=tk.Tk()
@@ -69,11 +65,11 @@ class FormularioOperacion:
         self.scrolledtext=st.ScrolledText(self.Adentroframe, width=28, height=7)
         self.scrolledtext.grid(column=1,row=0, padx=4, pady=4)
 
-        self.boton1=tk.Button(self.labelframe1, text="Generar Entrada", command=self.agregarRegistroRFID, width=13, height=3, anchor="center", background="Cadetblue")
+        self.boton1=tk.Button(self.labelframe1, text="Generar Entrada", command=self.agregarRegistroRFID, width=13, height=3, anchor="center", background="red")
         self.boton1.grid(column=1, row=4, padx=4, pady=4)
         self.Autdentro=tk.Button(self.Adentroframe, text="Boletos sin Cobro", command=self.Autdentro, width=15, height=1, anchor="center")
         self.Autdentro.grid(column=2, row=0, padx=4, pady=4)
-        self.boton2=tk.Button(self.pagina1, text="Salir del programa", command=quit, width=15, height=1, anchor="center", background="red")
+        self.boton2=tk.Button(self.pagina1, text="Salir del programa", command=self.Cerrar_Programa, width=15, height=1, anchor="center", background="red")
         self.boton2.grid(column=0, row=0, padx=4, pady=4)
 
     def Autdentro(self):
@@ -83,7 +79,6 @@ class FormularioOperacion:
             self.scrolledtext.insert(tk.END, "Entrada num: "+str(fila[0])+"\nEntro: "+str(fila[1])[:-3]+"\n\n")
 
     def agregarRegistroRFID(self):
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$impresion    $$$$$$$$$$$$$$$$$$$
         MaxFolio=str(self.operacion1.MaxfolioEntrada())
         MaxFolio = MaxFolio.strip("[(,)]")
         n1 = MaxFolio
@@ -102,7 +97,8 @@ class FormularioOperacion:
 
         horaentrada = str(fechaEntro)
         horaentrada=horaentrada[:19]
-        self.labelhr.configure(text=(horaentrada[:-3], "Entró"))
+        nueva_fecha = horaentrada[:-3]
+        self.labelhr.configure(text=(nueva_fecha, "Entró"))
         corteNum = 0
         placa=str(self.Placa.get(), )
         datos=(fechaEntro, corteNum, placa)
@@ -113,27 +109,28 @@ class FormularioOperacion:
         p.text(folioZZ+'\n')
         p.text('Entro: '+horaentrada[:-3]+'\n')
         p.text('Placas '+placa+'\n')
-        p.set(align="left")
-        #p.image("LOGO1.jpg")
+
+
         p.cut()
         p.image("LOGO1.jpg")
         p.text("--------------------------------------\n")
-        p.set(align="center")
         p.text("BOLETO DE ENTRADA\n")
         folioZZ=('FOLIO 000' + masuno)
         p.text('Entro: '+horaentrada[:-3]+'\n')
         p.text('Placas '+placa+'\n')
         p.text(folioZZ+'\n')
         p.image("AutoA.png")
-        p.set(align = "center")
+
         p.image("reducida.png")
 
 
         p.text("--------------------------------------\n")
         p.cut()
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$impresion fin$$$$$$$$$$$$$$$$
+
         self.operacion1.altaRegistroRFID(datos)
         self.Placa.set('')
+
+
 #########################fin de pagina1 inicio pagina2#########################
     def consulta_por_folio(self):
         self.pagina2 = ttk.Frame(self.cuaderno1)
@@ -170,7 +167,7 @@ class FormularioOperacion:
         self.cambio.grid(column=0, row=2, padx=4, pady=4)
         self.cuantopagasen=tk.StringVar()
         self.entrycuantopagasen=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.cuantopagasen)
-        #self.entrycuantopagasen.bind('<Return>',self.calcular_cambio)
+
         self.entrycuantopagasen.grid(column=1, row=0)
         self.elimportees=tk.StringVar()
         self.entryelimportees=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.elimportees, state="readonly")
@@ -206,10 +203,10 @@ class FormularioOperacion:
         self.entrycopia=tk.Entry(self.labelframe3, width=15, textvariable=self.copia, state = "readonly")
         self.entrycopia.grid(column=1, row=1)
         #SE CREA UN OBJETO caja de texto IGUAL A LOS DEMAS Y MUESTRA EL TOTAL DEL TIEMPO
-        self.ffeecha=tk.StringVar()
-        self.ffeecha_auxiliar=tk.StringVar()
-        self.entryffeecha=tk.Entry(self.labelframe3, width=15, textvariable=self.ffeecha_auxiliar, state= "readonly")
-        self.entryffeecha.grid(column=1, row=2)
+        self.ffecha=tk.StringVar()
+        self.ffecha_auxiliar=tk.StringVar()
+        self.entryffecha=tk.Entry(self.labelframe3, width=15, textvariable=self.ffecha_auxiliar, state= "readonly")
+        self.entryffecha.grid(column=1, row=2)
         #SE CREA UN OBJETO caja de texto IGUAL A LOS DEMAS para mostrar el importe y llevarlo a guardar en BD
         self.importe=tk.StringVar()
         self.entryimporte=tk.Entry(self.labelframe3, width=15, textvariable=self.importe, state= "readonly")
@@ -248,7 +245,7 @@ class FormularioOperacion:
         self.boton3=tk.Button(self.label_botones_boletos_perdido, text="Boleto Perdido\nCON FOLIO", command=self.BoletoPerdido_conFolio, width=10, height=3, anchor="center", font=("Arial", 10))
         self.boton3.grid(column=1, row=1, sticky=tk.NE, padx=10, pady=5)
 
-        self.boton3=tk.Button(self.label_botones_boletos_perdido, text="Boleto Perdido\nSIN FOLIO", command=self.BoletoPerdido_sinFolio, width=10, height=3, anchor="center", font=("Arial", 10))
+        self.boton3=tk.Button(self.label_botones_boletos_perdido, text="Boleto Perdido\nSIN FOLIO", command=self.BoletoPerdido_sinFolio, width=10, height=3, anchor="center", font=("Arial", 10), state="disabled")
         self.boton3.grid(column=2, row=1, sticky=tk.NE, padx=10, pady=5)
 
 
@@ -295,9 +292,9 @@ class FormularioOperacion:
         #botones
 
 
-        self.bcambio=tk.Button(self.labelcuantopagas, text="Cobro", command=self.calcular_cambio, width=10, height=2, anchor="center", background="Cadetblue")
+        self.bcambio=tk.Button(self.labelcuantopagas, text="Cobro", command=self.calcular_cambio, width=10, height=2, anchor="center", background="red")
         self.bcambio.grid(column=0, row=4)
-        
+
 
 
     def BoletoDentro(self):
@@ -328,6 +325,7 @@ class FormularioOperacion:
 
         self.folio.set(datos)
         datos = self.folio.get()
+        self.folio_auxiliar = datos
 
         # Consultar los datos correspondientes al folio
         respuesta = self.operacion1.consulta(datos)
@@ -354,12 +352,12 @@ class FormularioOperacion:
             # Modificar el formato de la fecha y hora
             date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
             date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
-            
+
             # Calcular la diferencia entre la fecha actual y la fecha del boleto perdido
-            ffeecha = fechaActual - date_time_mod2
+            ffecha = fechaActual - date_time_mod2
 
             # Calcular los segundos vividos
-            segundos_vividos = ffeecha.seconds
+            segundos_vividos = ffecha.seconds
 
             # Calcular las horas y minutos dentro del límite de 24 horas
             horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
@@ -371,8 +369,8 @@ class FormularioOperacion:
                 # Calcular el importe basado en las horas y días de permanencia
                 if horas_dentro <= 24:
                         importe = 200
-                if horas_dentro > 24 or ffeecha.days >= 1:
-                        importe = 200+((ffeecha.days)*720 + (horas_dentro * 30))
+                if horas_dentro > 24 or ffecha.days >= 1:
+                        importe = 200+((ffecha.days)*720 + (horas_dentro * 30))
 
             else:
                 importe = 200
@@ -388,8 +386,7 @@ class FormularioOperacion:
             self.PonerFOLIO.set("")
         else:
             # Limpiar campos y mostrar mensaje de error
-            self.descripcion.set('')
-            self.precio.set('')
+            self.limpiar_campos()
             mb.showinfo("Información", "No existe un auto con dicho código")
 
 
@@ -447,20 +444,19 @@ class FormularioOperacion:
 
 
     def consultar(self, event):
-        # Vaciar campo de importe
-        self.IImporte.config(text="")
 
         # Obtener folio
-        datos=str(self.folio.get())
+        datos=self.folio.get()
 
-        # Si la caja de texto esta vacia no realiza ninguna operación
-        if len(datos) == 0:pass
+        # Si la caja de texto esta vacia limpia la información en pantalla
+        if len(datos) == 0:
+            self.limpiar_campos()
 
-        #Verificar si lee el folio o la promocion
-        elif len(datos) < 20:
+        elif len(datos) < 20:#con esto revisamos si lee el folio o la promocion
             folio = self.operacion1.descifrar_folio(folio_cifrado = datos)
             self.folio.set(folio)
             folio = self.folio.get()
+            self.folio_auxiliar = folio
             print(f"\nFolio descifrado: {folio}")
 
             respuesta=self.operacion1.consulta(folio)
@@ -470,14 +466,12 @@ class FormularioOperacion:
                 self.Placa.set(respuesta[0][6])
                 self.CalculaPermanencia()#nos vamos a la funcion de calcular permanencia
             else:
-                self.descripcion.set('')
-                self.precio.set('')
-                self.folio.set("")
+                self.limpiar_campos()
                 mb.showinfo("Información", "No existe un auto con dicho código")
 
         else:
             mb.showinfo("Promocion", "leer primero el folio")
-            self.folio.set("")
+            self.limpiar_campos()
             self.entryfolio.focus()
 
 
@@ -491,7 +485,7 @@ class FormularioOperacion:
 
         :return: None
         """
-
+        self.scrol_datos_boleto_cobrado.delete("1.0", tk.END)
         self.IImporte.config(text="")
 
         # Obtiene el valor de salida (debería ser 'salida' en lugar de 'precio')
@@ -513,63 +507,35 @@ class FormularioOperacion:
                 )
 
             # Reinicia los valores de varios atributos
-            self.elcambioes.set("")
-            self.elimportees.set("")
-            self.cuantopagasen.set("")
-            self.descripcion.set('')
-            self.precio.set(salida)
-            self.copia.set("")
-            self.importe.set("")
-            self.ffeecha.set("")
-            self.ffeecha_auxiliar.set("")
-            self.folio.set("")
-            self.entryfolio.focus()
+            self.limpiar_campos()
 
         else:
             # Si el valor de salida tiene menos de 5 caracteres, significa que no ha sido cobrado
             self.scrol_datos_boleto_cobrado.delete("1.0", tk.END)
-            self.PrTi.set("Normal")     
+            self.PrTi.set("Normal")
             self.label15.configure(text="Lo puedes COBRAR")
 
             # Obtiene la fecha actual
             fecha = datetime.today()
-            fecha1= fecha.strftime("%Y-%m-%d %H:%M:%S")
-            fechaActual= datetime.strptime(fecha1, '%Y-%m-%d %H:%M:%S')
-
-
-            fechaActual= datetime.strptime(fecha1, '%Y-%m-%d %H:%M:%S')
+            fecha1 = fecha.strftime("%Y-%m-%d %H:%M:%S")
+            fechaActual = datetime.strptime(fecha1, '%Y-%m-%d %H:%M:%S')
             self.copia.set(fechaActual)
 
-            # Obtiene la fecha del boleto seleccionado y realiza las conversiones necesarias
-            date_time_str=str(self.descripcion.get())
-            date_time_obj= datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+
+
+            date_time_str = str(self.descripcion.get())
+            date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
             date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
             date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
-            ffeecha = fechaActual - date_time_mod2
+            ffecha = fechaActual - date_time_mod2
 
-            segundos_vividos = ffeecha.seconds
+            segundos_vividos = ffecha.seconds
             horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
 
             minutos_dentro, segundos_vividos = divmod(segundos_vividos, 60)
 
-            #calcular la diferencia de segundos
-            seg1 = ffeecha.seconds
-            #print ("dif = seg1 = ", seg1)
-            seg2 = ffeecha.seconds/60
-            #print ("dif/60 = seg2 = ", seg2)
-            seg3 = int(seg2)
-            #print ("entero y redondear seg3 = ", seg3)
-            seg4 = seg2-seg3
-            #print ("seg2 - seg 3 = seg4 = ", seg4)
-            seg5 = seg4*60
-            #print ("seg5 =", seg5)
-            seg6 = round(seg5)
-            #print  ("segundos dentro ===> ", seg6)
-
-            #self.label9.configure(text =(ffeecha, "tiempo dentro"))
-
-            self.ffeecha.set(ffeecha)
-            self.ffeecha_auxiliar.set(self.ffeecha.get()[:-3])
+            self.ffecha.set(ffecha)
+            self.ffecha_auxiliar.set(self.ffecha.get()[:-3])
 
             if minutos_dentro == 0: minutos = 0
             elif minutos_dentro < 16 and minutos_dentro >= 1: minutos = 1
@@ -577,27 +543,26 @@ class FormularioOperacion:
             elif minutos_dentro < 46 and minutos_dentro >= 31: minutos = 3
             elif minutos_dentro <= 59 and minutos_dentro >= 46: minutos = 4
 
-            if ffeecha.days == 0 and horas_dentro == 0:
-               importe = 30
-               self.importe.set(importe)
-               self.IImporte.config(text=self.importe.get())
-
-               self.entrypromo.focus()
+            if ffecha.days == 0 and horas_dentro == 0:
+                importe = 30
+                self.importe.set(importe)
+                self.IImporte.config(text=self.importe.get())
+                self.entrypromo.focus()
             else:
                 if minutos < 3: 
-                        importe = ((ffeecha.days)*720 + (horas_dentro * 30)+(minutos)*8)
+                        importe = ((ffecha.days)*720 + (horas_dentro * 30)+(minutos)*8)
                         self.importe.set(importe)
                         self.IImporte.config(text=self.importe.get())
 
                         self.entrypromo.focus()
                 if minutos  == 3: 
-                        importe = ((ffeecha.days)*720 + (horas_dentro * 30)+23)
+                        importe = ((ffecha.days)*720 + (horas_dentro * 30)+23)
                         self.importe.set(importe)
                         self.IImporte.config(text=self.importe.get())
 
                         self.entrypromo.focus()
                 if minutos == 4: 
-                        importe = ((ffeecha.days)*720 + (horas_dentro * 30)+(minutos)*7.5)
+                        importe = ((ffecha.days)*720 + (horas_dentro * 30)+(minutos)*7.5)
                         self.importe.set(importe)
                         self.IImporte.config(text=self.importe.get())
 
@@ -605,6 +570,21 @@ class FormularioOperacion:
                         self.entrypromo.focus()
 
     def calcular_cambio(self):
+        folio = self.folio.get()
+        if len(folio) == 0:
+            mb.showerror("Error", "Error vuelva a escanear el QR del boleto")
+
+            # Reinicia los valores de varios atributos
+            self.limpiar_campos()
+            return None
+
+        if self.folio_auxiliar != folio:
+            mb.showerror("Error", "Error vuelva a escanear el QR del boleto")
+
+            # Reinicia los valores de varios atributos
+            self.limpiar_campos()
+            return None
+
         elimporte=str(self.importe.get(), )
         self.elimportees.set(elimporte)
         valorescrito=str(self.cuantopagasen.get(),)
@@ -613,14 +593,11 @@ class FormularioOperacion:
         cambio=valorescrito-elimporte
         cambio=str(cambio)
         self.elcambioes.set(cambio)
+
+        self.GuardarCobro()#manda a llamar guardar cobro para cobrarlo y guardar registro
         self.Comprobante()#manda a llamar el comprobante y lo imprime
-        self.GuardarCobro()#manda a llamar guardar cobro para cobrarlo y guardar registro        
-        self.PonerFOLIO.set('')
-        self.IImporte.config(text="")
-        self.Placa.set("")
-        io.output(out1,0)
-        time.sleep(1)
-        io.output(out1,1) 
+
+
 
     def Comprobante(self):
         """
@@ -652,11 +629,30 @@ class FormularioOperacion:
         p.text('El auto entro: '+EntradaCompro[:-3]+'\n')
         SalioCompro = str(self.copia.get(),)
         p.text('El auto salio: '+SalioCompro[:-3]+'\n')
-        TiempoCompro = str(self.ffeecha.get(),)
+        TiempoCompro = str(self.ffecha.get(),)
         p.text('El auto permanecio: '+TiempoCompro[:-3]+'\n')
         folioactual=str(self.folio.get(), )
         p.text('El folio del boleto es: '+folioactual+'\n')
         p.cut()
+
+        p.image("LOGO1.jpg")
+        p.set(align="left")
+        #Compro de comprobante
+        ImporteCompro=str(self.importe.get(),)
+        #mb.showinfo("ImporteCompro",ImporteCompro)
+        p.text("El importe es $"+ImporteCompro+"\n")
+        EntradaCompro = str(self.descripcion.get(),)
+        p.text('El auto entro: '+EntradaCompro[:-3]+'\n')
+        SalioCompro = str(self.copia.get(),)
+        p.text('El auto salio: '+SalioCompro[:-3]+'\n')
+        TiempoCompro = str(self.ffecha.get(),)
+        p.text('El auto permanecio: '+TiempoCompro[:-3]+'\n')
+        folioactual=str(self.folio.get(), )
+        p.text('El folio del boleto es: '+folioactual+'\n')
+        p.cut()
+
+        self.limpiar_campos()
+
 
     def GuardarCobro(self):
         salida = str(self.precio.get(), )#deveria ser salida en lugar de precio pero asi estaba el base
@@ -664,46 +660,48 @@ class FormularioOperacion:
         if len(salida)>5:
             self.label15.configure(text=("con salida, INMODIFICABLE"))
             mb.showinfo("Información", "Ya Tiene Salida")
-            self.descripcion.set('')
-            self.precio.set('')
-            self.copia.set("")
-            self.importe.set("")
-            self.ffeecha.set("")
-            self.ffeecha_auxiliar.set("")
-            self.folio.set("")
-            self.label15.configure(text=(""))
-            self.entryfolio.focus()
+            self.limpiar_campos()
         else:
-            #self.Comprobante()
+            respuesta = self.operacion1.consulta({self.folio.get()})
+
+            if len(respuesta) == 0:			
+                mb.showerror("Error", f"Ha ocurrido un error al realizar el cobro, escanee nuevamente el QR")
+
+                return	None
+
+            if respuesta[0][1] is not None:
+
+                # Imprime en una caja de texto la información del boleto cuando ya ha sido cobrado
+                self.scrol_datos_boleto_cobrado.delete("1.0", tk.END)
+                for fila in respuesta:
+                    self.scrol_datos_boleto_cobrado.insert(
+                        tk.END,
+                        f"Folio: {fila[2]}\nEntró: {str(fila[0])[:-3]}\nSalió: {str(fila[1])[:-3]}\nTiempo: {str(fila[3])[:-3]}\nTarifa: {fila[4]}\nImporte: {fila[5]}"
+                    )
+
+                # Reinicia los valores de varios atributos
+                self.limpiar_campos()
+
+                self.label15.configure(text=("Este Boleto ya Tiene cobro"))
+                return	None
+
             self.label15.configure(text=(salida, "SI se debe modificar"))
             importe1 =str(self.importe.get(),)
             folio1= str(self.folio.get(),)
             valorhoy = str(self.copia.get(),)
             fechaActual1 = datetime.strptime(valorhoy, '%Y-%m-%d %H:%M:%S' )
             fechaActual= datetime.strftime(fechaActual1,'%Y-%m-%d %H:%M:%S' )
-            ffeecha1= str(self.ffeecha.get(),)
+            ffecha1= str(self.ffecha.get(),)
             valor=str(self.descripcion.get(),)
             fechaOrigen = datetime.strptime(valor, '%Y-%m-%d %H:%M:%S')
             promoTipo = str(self.PrTi.get(),)
 
             vobo = "lmf"#este
-            datos=(vobo, importe1, ffeecha1, fechaOrigen, fechaActual, promoTipo, TipoPromocion, folio1)
+            datos=(vobo, importe1, ffecha1, fechaOrigen, fechaActual, promoTipo, TipoPromocion, folio1)
 
             self.operacion1.guardacobro(datos)
-            self.descripcion.set('')
-            self.precio.set('')
-            self.copia.set("")
-            self.label15.configure(text=(""))
-            self.importe.set("")
-            self.ffeecha.set("")
-            self.ffeecha_auxiliar.set("")
-            self.folio.set("")
-            self.PrTi.set("")
-            self.PonerFOLIO.set('')
-            #self.elcambioes.set("")
-            #self.elimportees.set("")
-            #self.cuantopagasen.set("")
-            self.entryfolio.focus()#se posiciona en leer qr
+
+
 
 
     def CalculaPromocion(self,event):
@@ -731,8 +729,8 @@ class FormularioOperacion:
                    date_time_obj= datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
                    date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
                    date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
-                   ffeecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffeecha.days, "dias"))
-                   segundos_vividos = ffeecha.seconds
+                   ffecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffecha.days, "dias"))
+                   segundos_vividos = ffecha.seconds
                    horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
                    minutos_dentro, segundos_vividos = divmod(segundos_vividos, 60)
                    if minutos_dentro < 15 and minutos_dentro  >= 0:
@@ -748,8 +746,9 @@ class FormularioOperacion:
                         minutos = 4
                         importe = 22
                    if horas_dentro >= 1:
-                        importe = (((ffeecha.days)*720 + (horas_dentro * 24)+(minutos)*6)-8)
+                        importe = (((ffecha.days)*720 + (horas_dentro * 24)+(minutos)*6)-8)
                    self.importe.set(importe)
+                   self.IImporte.config(text=self.importe.get())
                    self.PrTi.set("PRV")
                    self.promo.set("")
         ###########starbucks
@@ -766,8 +765,8 @@ class FormularioOperacion:
                    
 
 
-                   ffeecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffeecha.days, "dias"))
-                   segundos_vividos = ffeecha.seconds
+                   ffecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffecha.days, "dias"))
+                   segundos_vividos = ffecha.seconds
                    horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
                    minutos_dentro, segundos_vividos = divmod(segundos_vividos, 60)
                    if minutos_dentro < 15 and minutos_dentro  >= 0:
@@ -783,8 +782,9 @@ class FormularioOperacion:
                         minutos = 4
                         importe = 24
                    if horas_dentro >= 1:
-                        importe = ((ffeecha.days)*720 + (horas_dentro * 24)+(minutos)*6)
+                        importe = ((ffecha.days)*720 + (horas_dentro * 24)+(minutos)*6)
                    self.importe.set(importe)
+                   self.IImporte.config(text=self.importe.get())
                    self.PrTi.set("StB")
                    self.promo.set("")
         ########## Promocion Sonora
@@ -800,8 +800,8 @@ class FormularioOperacion:
                    
 
 
-                   ffeecha = fechaActual - date_time_mod2
-                   segundos_vividos = ffeecha.seconds
+                   ffecha = fechaActual - date_time_mod2
+                   segundos_vividos = ffecha.seconds
                    horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
                    minutos_dentro, segundos_vividos = divmod(segundos_vividos, 60)
                    if minutos_dentro < 15 and minutos_dentro  >= 0:
@@ -823,13 +823,14 @@ class FormularioOperacion:
                    if horas_dentro >= 3 and horas_dentro < 9:
                         importe = 90
                    if horas_dentro >= 9 and minutos < 3:
-                        importe = (((ffeecha.days)*720 + (horas_dentro * 30)+(minutos)*8)-150)
+                        importe = (((ffecha.days)*720 + (horas_dentro * 30)+(minutos)*8)-150)
                    if horas_dentro >= 9 and minutos == 3:
-                        importe = (((ffeecha.days)*720 + (horas_dentro * 30)+(23))-150)
+                        importe = (((ffecha.days)*720 + (horas_dentro * 30)+(23))-150)
                    if horas_dentro >= 9 and minutos == 4:
-                        importe = (((ffeecha.days)*720 + (horas_dentro * 30)+((minutos)*7.5))-150)                
+                        importe = (((ffecha.days)*720 + (horas_dentro * 30)+((minutos)*7.5))-150)                
                                                 
                    self.importe.set(importe)
+                   self.IImporte.config(text=self.importe.get())
                    self.PrTi.set("SNR")
                   # mb.showinfo("SONORA",NumP)
                    self.promo.set("")
@@ -846,8 +847,8 @@ class FormularioOperacion:
 
 
 
-                   ffeecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffeecha.days, "dias"))
-                   segundos_vividos = ffeecha.seconds
+                   ffecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffecha.days, "dias"))
+                   segundos_vividos = ffecha.seconds
                    horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
                    minutos_dentro, segundos_vividos = divmod(segundos_vividos, 60)
                    if minutos_dentro < 15 and minutos_dentro  >= 0:
@@ -864,8 +865,9 @@ class FormularioOperacion:
                         importe = 24           
 
                    if horas_dentro >= 1:
-                        importe = ((ffeecha.days)*720 + (horas_dentro * 24)+(minutos)*6)
+                        importe = ((ffecha.days)*720 + (horas_dentro * 24)+(minutos)*6)
                    self.importe.set(importe)
+                   self.IImporte.config(text=self.importe.get())
 
                    self.PrTi.set("APOTEK")
                    self.promo.set("")
@@ -882,8 +884,8 @@ class FormularioOperacion:
 
 
 
-                   ffeecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffeecha.days, "dias"))
-                   segundos_vividos = ffeecha.seconds
+                   ffecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffecha.days, "dias"))
+                   segundos_vividos = ffecha.seconds
                    horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
                    minutos_dentro, segundos_vividos = divmod(segundos_vividos, 60)
                    if minutos_dentro < 15 and minutos_dentro  >= 0:
@@ -900,8 +902,9 @@ class FormularioOperacion:
                         importe = 24           
 
                    if horas_dentro >= 1:
-                        importe = ((ffeecha.days)*720 + (horas_dentro * 24)+(minutos)*6)
+                        importe = ((ffecha.days)*720 + (horas_dentro * 24)+(minutos)*6)
                    self.importe.set(importe)
+                   self.IImporte.config(text=self.importe.get())
 
                    self.PrTi.set("SHAKE")
                    self.promo.set("")           
@@ -921,7 +924,7 @@ class FormularioOperacion:
         self.labelframe4=ttk.LabelFrame(self.pagina3, text="Cuadro Comparativo")
         self.labelframe4.grid(column=1, row=1, padx=0, pady=0)
         self.labelframe5=ttk.LabelFrame(self.pagina3, text="Reporte de Cortes")
-        self.labelframe5.grid(column=1, row=2, padx=1, pady=1)      
+        self.labelframe5.grid(column=1, row=2, padx=1, pady=1)
         self.lblSal=ttk.Label(self.labelframe4, text="Salida de Autos")
         self.lblSal.grid(column=3, row=1, padx=1, pady=1)
         self.lblS=ttk.Label(self.labelframe4, text="Entrada de Autos")
@@ -1019,7 +1022,7 @@ class FormularioOperacion:
         self.boton2.grid(column=0, row=2, padx=4, pady=4)
         self.boton3=tk.Button(self.labelframe2, text="Calcular Corte", command=self.Calcular_Corte, width=15, height=1)
         self.boton3.grid(column=2, row=0, padx=4, pady=4)
-        self.boton4=tk.Button(self.labelframe2, text="Guardar Corte", command=self.Guardar_Corte, width=15, height=1, anchor="center", background="green")
+        self.boton4=tk.Button(self.labelframe2, text="Guardar Corte", command=self.Guardar_Corte, width=15, height=1, anchor="center", background="red")
         self.boton4.grid(column=2, row=4, padx=4, pady=4)
         self.scrolledtext1=st.ScrolledText(self.labelframe1, width=28, height=4)
         self.scrolledtext1.grid(column=0,row=1, padx=1, pady=1)
@@ -1036,9 +1039,9 @@ class FormularioOperacion:
         Ano= datetime.now().date().year
         self.AnoCorte.set(Ano)
         self.entryAnoCorte=tk.Entry(self.labelframe5, width=7, textvariable=self.AnoCorte, justify=tk.RIGHT)
-        self.entryAnoCorte.grid(column=1, row=2)       
+        self.entryAnoCorte.grid(column=1, row=2)
         self.boton6=tk.Button(self.labelframe5, text="Reporte de Corte", command=self.Reporte_Corte, width=15, height=1, anchor="center", background="red")
-        self.boton6.grid(column=3, row=2, padx=4, pady=4)       
+        self.boton6.grid(column=3, row=2, padx=4, pady=4)
 
         self.seccion_boton_usuario = ttk.LabelFrame(self.pagina3, text='Administrar usuarios')
         self.seccion_boton_usuario.grid(row=3, column=1, padx=10, pady=10)
@@ -1064,9 +1067,9 @@ class FormularioOperacion:
         Numcorte=str(self.CortesAnteri.get(), )
         Numcorte=int(Numcorte)
         Numcorte=str(Numcorte)
-        io.output(out1,0)
-        time.sleep(1)
-        io.output(out1,1)
+
+
+
         respuesta=self.operacion1.desglose_cobrados(Numcorte)
 
         self.scrolledtxt2.delete("1.0", tk.END)
@@ -1144,39 +1147,41 @@ class FormularioOperacion:
                 date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
                 date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
                 date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
-                
+
 
 
                 ffecha = fechaActual - date_time_mod2
                 segundos_vividos = ffecha.seconds
                 horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
                 minutos_dentro, segundos_vividos = divmod(segundos_vividos, 60)
-                
+
                 importe = 0
 
                 self.importe.set(importe)
                 self.IImporte.config(text=self.importe.get())
+                self.IImporte.config(text=importe)
                 self.PrTi.set("CDO")
                 self.promo.set("")
 
 
                 p.text('Boleto Cancelado\n')
-                FoliodelCancelado = str(self.FolioCancelado.get(),)
-                p.text('Folio boleto cancelado: '+FoliodelCancelado+'\n')
+                FoliodelCancelado = str(self.FolioCancelado.get())
+                p.text('Folio boleto cancelado: ' + FoliodelCancelado + '\n')
                 fecha = datetime.today()
                 fechaNota = datetime.today()
-                fechaNota= fechaNota.strftime("%b-%d-%A-%Y %H:%M:%S")
+                fechaNota = fechaNota.strftime("%b-%d-%A-%Y %H:%M:%S")
                 horaNota = str(fechaNota)
                 p.set(align="left")
                 p.set('Big line\n', font='b')
-                p.text('Fecha: '+horaNota+'\n')
-                EntradaCompro = str(self.descripcion.get(),)
-                p.text('El auto entro: '+EntradaCompro[:-3]+'\n')
-                SalioCompro = str(self.copia.get(),)
-                p.text('El auto salio: '+SalioCompro[:-3]+'\n')
+                p.text('Fecha: ' + horaNota[:-3] + '\n')
+                EntradaCompro = str(self.descripcion.get())
+                p.text('El auto entro: ' + EntradaCompro[:-3] + '\n')
+                SalioCompro = str(self.copia.get())
+                p.text('El auto salio: ' + SalioCompro[:-3] + '\n')
                 self.GuardarCobro()
                 self.FolioCancelado.set("")
                 p.cut()
+                self.limpiar_campos()
 
             else:
                 self.descripcion.set('')
@@ -1212,7 +1217,7 @@ class FormularioOperacion:
             p.text('\n')
             p.text('importe :')
             p.text(str(fila[3]))
-            p.text('\n')
+            p.text('\n\n')
         else:
             p.cut()
 
@@ -1227,7 +1232,7 @@ class FormularioOperacion:
         ultiCort1=(ultiCort1)[startLoc: endLoc]
         ultiCort1 = ultiCort1.strip('),')
         if len(ultiCort1) <= 19:
-            # mb.showinfo("msj dos",ultiCort1)
+
             ultiCort1= datetime.strptime(ultiCort1, '%Y, %m, %d, %H, %M')
         else:
             ultiCort1= datetime.strptime(ultiCort1, '%Y, %m, %d, %H, %M, %S')
@@ -1248,11 +1253,11 @@ class FormularioOperacion:
         ######Obtenemos los datos del Cajero en Turno
         cajero=self.operacion1.CajeroenTurno()
         for fila in cajero:
-           cajero1 = fila[0]
-           nombre2 = fila[1]
-           inicio1 = fila[2]
-           turno1 = fila[3]
-           usuario1 = fila[4]
+            cajero1 = fila[0]
+            nombre2 = fila[1]
+            inicio1 = fila[2]
+            turno1 = fila[3]
+            usuario1 = fila[4]
         hoy = str(datetime.today())
         hoy1=hoy[:20]
 
@@ -1268,7 +1273,7 @@ class FormularioOperacion:
         ######la fecha del inicial obtiene de labase de datos
         fechaInicio1 = str(inicio1)
         fechaInicio2 = datetime.strptime(fechaInicio1, '%Y-%m-%d %H:%M:%S')
-        fechaInicio = fechaInicio2        
+        fechaInicio = fechaInicio2
         ######el importe se obtiene de la suma
         ImpCorte2 =str(self.ImporteCorte.get(),)
         Im38=ImpCorte2.strip('(,)')
@@ -1295,15 +1300,36 @@ class FormularioOperacion:
         p.text('IMPORTE: $ '+Im38+'\n')
 
         ultiCort1=str(self.FechUCORTE.get(),)
+        DDESEM=(datetime.today().weekday())
+
+        if DDESEM == 0:
+            DDESEM = 'LUNES'
+        if DDESEM == 1:
+            DDESEM = 'MARTES'
+        if DDESEM == 2:
+            DDESEM = 'MIERCOLES'
+        if DDESEM == 3:
+            DDESEM = 'JUEVES'
+        if DDESEM == 4:
+            DDESEM = 'VIERNES'
+        if DDESEM == 5:
+            DDESEM = 'SABADO'
+        if DDESEM == 6:
+            DDESEM = 'DOMINGO'
+                                            
         ultiCort4= datetime.strptime(ultiCort1, '%Y-%m-%d %H:%M:%S')
         ultiCort5 = datetime.strftime(ultiCort4, '%D a las %H:%M:%S')
-        p.text('Inicio:')
+        p.text('Inicio: ')
+        p.text(str(DDESEM))
+        p.text(' ')
         p.text(ultiCort5)
         p.text('\n')
         valorFEsteCorte = str(self.FechaCorte.get(),)
         fechaDECorte = datetime.strptime(valorFEsteCorte, '%Y-%m-%d %H:%M:%S' )
-        fechaDECorte = datetime.strftime(fechaDECorte, '%D a las %H:%M:%S')
+        fechaDECorte = datetime.strftime(fechaDECorte, '%D a las %H:%M:%S' )
         p.text('Final :')
+        p.text(str(DDESEM))
+        p.text(' ') 
         p.text(str(fechaDECorte))
         p.text('\n')
         MaxFolio=str(self.operacion1.MaxfolioEntrada())
@@ -1313,7 +1339,7 @@ class FormularioOperacion:
         IniFolio =int(MaxFolio)-int(BEDespuesCorteImpre)
         IniFolio = str(IniFolio)
         p.text("Folio "+IniFolio+" al inicio del turno\n")
-        p.text("Folio "+MaxFolio+" al final del turno\n") 
+        p.text("Folio "+MaxFolio+" al final del turno\n")
         p.text("Cajero en Turno: "+nombre2+"\n")
         p.text("Turno: "+str(turno1)+"\n")
 
@@ -1352,17 +1378,17 @@ class FormularioOperacion:
         self.operacion1.ActualizarEntradasConcorte(ActEntradas)
         vobo='ant'
         self.operacion1.NocobradosAnt(vobo)
-        ponercorte =int(maxnum) 
-        #mb.showinfo("primero",ponercorte)
+        ponercorte =int(maxnum)
+
         self.CortesAnteri.set(ponercorte)
-        #self.desglose_cobrados()
+
         Numcorte=str(self.CortesAnteri.get(), )
         Numcorte=int(Numcorte)
         Numcorte=str(Numcorte)
-        #mb.showinfo("segundo", Numcorte)
-        io.output(out1,0)
-        time.sleep(1)
-        io.output(out1,1) 
+
+
+
+
         respuesta=self.operacion1.desglose_cobrados(Numcorte)
         self.scrolledtxt2.delete("1.0", tk.END)
 
@@ -1398,15 +1424,15 @@ class FormularioOperacion:
 
             p.text(f"Boletos perdidos generados: {Boletos_perdidos_generados + Boletos_perdidos_cobrados}"+'\n')
             for boleto in Boletos_perdidos_cobrados_desglose:
-                p.text(f"Folio:{boleto[0]}\nFecha entrada:{boleto[1]}\n")
+                p.text(f"Folio: {boleto[0]}\nFecha entrada: {boleto[1]}\n")
             for boleto in Boletos_perdidos_generados_desglose:
-                p.text(f"Folio:{boleto[0]}\nFecha entrada:{boleto[1]}\n")
+                p.text(f"Folio: {boleto[0]}\nFecha entrada: {boleto[1]}\n")
 
             p.text("**********************************\n")
 
             p.text(f"Boletos perdidos cobrados: {Boletos_perdidos_cobrados}"+'\n\n')
             for boleto in Boletos_perdidos_cobrados_desglose:
-                p.text(f"Folio:{boleto[0]}\nFecha entrada:{boleto[1]}\nFecha salida:{boleto[2]}\n")
+                p.text(f"Folio: {boleto[0]}\nFecha entrada: {boleto[1]}\nFecha salida:  {boleto[2]}\n")
             p.text("**********************************\n")
 
             p.text(f"Boletos perdidos quedados: {Boletos_perdidos_no_cobrados}"+'\n\n')
@@ -1421,7 +1447,7 @@ class FormularioOperacion:
 
 
     def Cerrar_Programa(self):
-        self.ventana1.destroy()  
+        self.ventana1.destroy()
 
 
 
@@ -1577,8 +1603,6 @@ class FormularioOperacion:
             else:
                 mb.showwarning("ERROR", 'Contrasena Incorrecta')
 
- #############################       
-        
     def Puertoycontar(self):
 
         CuantosBoletosCobro=str(self.operacion1.CuantosBoletosCobro())
@@ -1625,14 +1649,14 @@ class FormularioOperacion:
         datos = self.PonerFOLIO.get()
         self.folio.set(str(datos))
         datos = self.folio.get()
+        self.folio_auxiliar = datos
 
         if len(datos) > 0:
             respuesta = self.operacion1.consulta(datos)
             if len(respuesta) > 0:
                 if respuesta[0][6] == "BoletoPerdido":
                     mb.showerror("Error", "No se puede cobrar como maltratado un boleto perdido")
-                    self.PonerFOLIO.set("")
-                    self.folio.set("")
+                    self.limpiar_campos()
                     return None
 
                 else:
@@ -1645,12 +1669,13 @@ class FormularioOperacion:
                 self.descripcion.set('')
                 self.precio.set('')
                 self.PonerFOLIO.set('')
+                self.limpiar_campos()
 
                 mb.showinfo("Información", "No existe un auto con dicho código")
         else:
             mb.showinfo("Error", "Ingrese el folio del boleto dañado")
-            self.folio.set("")
-            self.entryfolio.focus()
+            self.limpiar_campos()
+
 
     def desactivar(self):
         """
@@ -1678,7 +1703,27 @@ class FormularioOperacion:
         """
         self.ventana1.deiconify()
 
+    def limpiar_campos(self):
+        # Reinicia los valores de varios atributos
+        #self.elcambioes.set("")
+        #self.elimportees.set("")
+        self.folio.set("")
+        self.descripcion.set("")
+        self.precio.set("")
+        self.copia.set("")
+        self.importe.set("")
+        self.ffecha.set("")
+        self.ffecha_auxiliar.set("")
+        self.promo.set("")
+        self.PonerFOLIO.set("")
+        self.label15.configure(text="")
+        self.PrTi.set("")
+        self.IImporte.config(text="")
+        self.BoletoDentro()
+        self.folio_auxiliar = None
+        self.entryfolio.focus()
 
+    
 
 #aplicacion1=FormularioOperacion()
 
