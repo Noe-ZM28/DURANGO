@@ -1470,7 +1470,7 @@ class FormularioOperacion:
                         mb.showwarning("IMPORTANTE", " Debe ser un numero positivo mayor a cero")
                         return False
                     else :
-                        Libro = '/home/pi/Documents/DURANGO/ago2022/REPORTE/Rpte Corte '+ str(mes)+'-'+str(Ano)+'  '+str(datetime.now().date())+'.xlsx' #+'/' '/home/pi/Documents/electrofloculacion/belen/Prueba/RPTCORTE.xlsx'
+                        Libro = '/home/pi/Documents/DURANGO/TPV/REPORTE/Rpte Corte '+ str(mes)+'-'+str(Ano)+'  '+str(datetime.now().date())+'.xlsx' #+'/' '/home/pi/Documents/electrofloculacion/belen/Prueba/RPTCORTE.xlsx'
                         #Libro = '/media/pi/rootfs/home/pi/Documents/Cobro/REPORTE/Rpte Corte '+ str(mes)+'-'+str(Ano)+'  '+str(datetime.now().date())+'.xlsx' #+
                         #mb.showinfo("msj uno",mes)
                         #mb.showinfo("msj dos",Ano)
