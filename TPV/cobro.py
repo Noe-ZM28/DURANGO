@@ -18,7 +18,7 @@ TipoPromocion = 1
 
 ###-###
 p = Usb(0x04b8, 0x0202, 0)
-penalizacion_con_importe = True
+penalizacion_con_importe = False
 from view_login import View_Login
 
 
@@ -715,8 +715,8 @@ class FormularioOperacion:
                 if TipoProIni==("AM ADMIN"):
                    NumP=TipoPromocion[10:]
                    self.importe.set(0)
+                   self.IImporte.config(text=self.importe.get())
                    self.PrTi.set("ADMIN")
-        #           mb.showinfo("ADMIN",NumP)
                    self.promo.set("")
                 if TipoProIni==("PR PROVE"):
                    NumP=TipoPromocion[12:]
@@ -763,9 +763,8 @@ class FormularioOperacion:
                    date_time_mod = datetime.strftime(date_time_obj, '%Y/%m/%d/%H/%M/%S')
                    date_time_mod2 = datetime.strptime(date_time_mod, '%Y/%m/%d/%H/%M/%S')
                    
+                   ffecha = fechaActual - date_time_mod2  
 
-
-                   ffecha = fechaActual - date_time_mod2            #self.label11.configure(text=(ffecha.days, "dias"))
                    segundos_vividos = ffecha.seconds
                    horas_dentro, segundos_vividos = divmod(segundos_vividos, 3600)
                    minutos_dentro, segundos_vividos = divmod(segundos_vividos, 60)
@@ -1708,6 +1707,7 @@ class FormularioOperacion:
         #self.elcambioes.set("")
         #self.elimportees.set("")
         self.folio.set("")
+        self.Placa.set("")
         self.descripcion.set("")
         self.precio.set("")
         self.copia.set("")
