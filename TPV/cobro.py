@@ -2578,8 +2578,16 @@ class FormularioOperacion:
                         self.entryPlaca.focus()
                         return False
 
+                    # Obtener la fecha y hora actual en formato deseado
+                    VigAct = VigAct.strftime("%Y-%m-%d %H:%M:%S")
+                    # Convertir la cadena de caracteres en un objeto datetime
+                    VigAct = datetime.strptime(VigAct, "%Y-%m-%d %H:%M:%S")
+
+                    # Obtener la fecha y hora actual en formato deseado
                     hoy = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+                    # Convertir la cadena de caracteres en un objeto datetime
                     hoy = datetime.strptime(hoy, "%Y-%m-%d %H:%M:%S")
+
                     limite = VigAct + timedelta(days=Tolerancia)
                     print(limite)
 
