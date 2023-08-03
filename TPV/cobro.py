@@ -619,17 +619,15 @@ class FormularioOperacion:
         else:
 
             if minutos < 3: 
-                importe = ((self.dias_dentro)*720 + (self.horas_dentro * 30)+(minutos)*8)
-
+                importe = (self.dias_dentro * 720) + (self.horas_dentro * 30) + (minutos * 8)
 
             elif minutos  == 3: 
-                importe = ((self.dias_dentro)*720 + (self.horas_dentro * 30)+23)
-
+                importe = (self.dias_dentro * 720) + (self.horas_dentro * 30) + 23
+ 
             elif minutos == 4: 
-                importe = ((self.dias_dentro)*720 + (self.horas_dentro * 30)+(minutos)*7.5)
+                importe = (self.dias_dentro * 720) + (self.horas_dentro * 30) + (minutos *7.5)
 
-
-
+        importe = int(importe)
 
         # Establecer el importe y mostrarlo
         self.mostrar_importe(importe)
@@ -830,146 +828,144 @@ class FormularioOperacion:
         # Obtiene el importe actual
         importe = int(self.importe.get())
 
+        # Promocion administración
         if TipoProIni==("AM ADMIN"):
             importe = 0
 
             text_promo = "ADMIN"
 
-
-
         # Promocion proveedores
         elif TipoProIni==("PR PROVE"):
 
-            if self.minutos_dentro < 15 and self.minutos_dentro  >= 0:
+            if self.minutos_dentro == 0:
+                minutos = 0
+
+            if self.minutos_dentro <= 15:
                 minutos = 1
                 importe = 0
-            if self.minutos_dentro < 30 and self.minutos_dentro  >= 15:
+
+            elif self.minutos_dentro < 31 and self.minutos_dentro  >= 16:
                 minutos = 2
                 importe = 8
-            if self.minutos_dentro < 45 and self.minutos_dentro  >= 30:
+
+            elif self.minutos_dentro < 46 and self.minutos_dentro  >= 31:
                 minutos = 3
                 importe = 15
-            if self.minutos_dentro < 60 and self.minutos_dentro  >= 45:
+
+            elif self.minutos_dentro <= 59 and self.minutos_dentro  >= 46:
                 minutos = 4
                 importe = 22
-            if self.horas_dentro >= 1:
-                importe = (((self.dias_dentro)*720 + (self.horas_dentro * 24)+(minutos)*6)-8)
 
+            if self.horas_dentro >= 1 :
+                # importe = (self.dias_dentro * 720) + (self.horas_dentro * 24) + (minutos * 6)
 
+                if minutos < 3: 
+                    importe = (self.dias_dentro * 720) + (self.horas_dentro * 22) + (minutos * 8)
 
+                elif minutos  == 3: 
+                    importe = (self.dias_dentro * 720) + (self.horas_dentro * 22) + 23
+    
+                elif minutos == 4: 
+                    importe = (self.dias_dentro * 720) + (self.horas_dentro * 22) + (minutos *7.5)
+
+            importe = int(importe)
 
             text_promo = "PRV"
 
+        # Promocion starbucks, at pote, at shake
+        elif TipoProIni == "ST STARB" or TipoProIni == "AT APOTE" or TipoProIni == "SS SHAKE":
 
-        # Promocion starbucks
-        elif TipoProIni==("ST STARB"):
- 
-            if self.minutos_dentro < 15 and self.minutos_dentro  >= 0:
+            self.minutos_dentro = 45
+            self.horas_dentro = 18
+            self.dias_dentro = 0
+
+            if self.minutos_dentro == 0:
+                minutos = 0
+
+            elif self.minutos_dentro <= 15:
                 minutos = 1
-                importe = 24
-            if self.minutos_dentro < 30 and self.minutos_dentro  >= 15:
+
+            elif self.minutos_dentro <= 30:
                 minutos = 2
-                importe = 24
-            if self.minutos_dentro < 45 and self.minutos_dentro  >= 30:
+
+            elif self.minutos_dentro <= 45:
                 minutos = 3
-                importe = 24
-            if self.minutos_dentro < 60 and self.minutos_dentro  >= 45:
+
+            elif self.minutos_dentro <= 60:
                 minutos = 4
-                importe = 24
-            if self.horas_dentro >= 1:
-                importe = ((self.dias_dentro)*720 + (self.horas_dentro * 24)+(minutos)*6)
+
+            if self.horas_dentro == 0:
+                importe = 24 
+
+            elif self.horas_dentro >= 1:
+                importe = (self.dias_dentro * 720) + (self.horas_dentro * 24) + (minutos * 6)
 
 
+            if TipoProIni== "ST STARB":
+                text_promo = "StB"
 
+            elif TipoProIni == "AT APOTE":
+                text_promo = "APOTEK"
 
-            text_promo = "StB"
-
-            if valida_promo == "Danado":text_promo = text_promo + valida_promo
-
-            self.PrTi.set(text_promo)
-            self.promo.set("")
+            elif TipoProIni == "SS SHAKE":
+                text_promo = "SHAKE"
 
         # Promocion Sonora
-        elif TipoProIni==("SG SONOR"):
+        elif TipoProIni == "SG SONOR":
 
-            if self.minutos_dentro < 15 and self.minutos_dentro  >= 0:
+            if self.minutos_dentro == 0:
+                minutos = 0
+
+            elif self.minutos_dentro <= 15:
                 minutos = 1
-                importe = 60
-            if self.minutos_dentro < 30 and self.minutos_dentro  >= 15:
+
+            elif self.minutos_dentro <= 30:
                 minutos = 2
-                importe = 60
-            if self.minutos_dentro < 45 and self.minutos_dentro  >= 30:
+
+            elif self.minutos_dentro <= 45:
                 minutos = 3
-                importe = 60
-            if self.minutos_dentro < 60 and self.minutos_dentro  >= 45:
+
+            elif self.minutos_dentro <= 60:
                 minutos = 4
-                importe = 60           
-            if self.minutos_dentro < 60:
+
+
+            if self.horas_dentro <= 3:
                 importe = 60
-            if self.horas_dentro >= 1 and self.horas_dentro < 3 :
-                importe = 60
-            if self.horas_dentro >= 3 and self.horas_dentro < 9:
+
+                if self.horas_dentro == 3 and self.minutos_dentro >= 1:
+                    importe = 90
+
+
+            elif self.horas_dentro <= 9:
                 importe = 90
-            if self.horas_dentro >= 9 and minutos < 3:
-                importe = (((self.dias_dentro)*720 + (self.horas_dentro * 30)+(minutos)*8)-150)
-            if self.horas_dentro >= 9 and minutos == 3:
-                importe = (((self.dias_dentro)*720 + (self.horas_dentro * 30)+(23))-150)
-            if self.horas_dentro >= 9 and minutos == 4:
-                importe = (((self.dias_dentro)*720 + (self.horas_dentro * 30)+((minutos)*7.5))-150)                
+
+                if self.horas_dentro == 9 and self.minutos_dentro >= 1:
+                    if minutos < 3: 
+                        importe = (self.dias_dentro * 720) + importe + (minutos * 8)
+
+                    elif minutos  == 3: 
+                        importe = (self.dias_dentro * 720) + importe + 23
+
+                    elif minutos == 4: 
+                        importe = (self.dias_dentro * 720) + importe + (minutos * 7.5)
+
+            else:
+                importe = 120
+
+                if minutos < 3: 
+                    importe = (self.dias_dentro * 720) + importe + (minutos * 8)
+
+                elif minutos  == 3: 
+                    importe = (self.dias_dentro * 720) + importe + 23
+
+                elif minutos == 4: 
+                    importe = (self.dias_dentro * 720) + importe + (minutos * 7.5)
 
 
+            importe = int(importe)
 
 
             text_promo = "SNR"
-
-
-
-        # promocion at pote
-        elif TipoProIni==("AT APOTE"):
-
-            if self.minutos_dentro < 15 and self.minutos_dentro  >= 0:
-                minutos = 1
-                importe = 24
-            if self.minutos_dentro < 30 and self.minutos_dentro  >= 15:
-                minutos = 2
-                importe = 24
-            if self.minutos_dentro < 45 and self.minutos_dentro  >= 30:
-                minutos = 3
-                importe = 24
-            if self.minutos_dentro < 60 and self.minutos_dentro  >= 45:
-                minutos = 4
-                importe = 24           
-
-            if self.horas_dentro >= 1:
-                importe = ((self.dias_dentro)*720 + (self.horas_dentro * 24)+(minutos)*6)
-
-
-
-            text_promo = "APOTEK"
-
-
-        # promocion at shake
-        elif TipoProIni==("SS SHAKE"):
-
-            if self.minutos_dentro < 15 and self.minutos_dentro  >= 0:
-                minutos = 1
-                importe = 24
-            if self.minutos_dentro < 30 and self.minutos_dentro  >= 15:
-                minutos = 2
-                importe = 24
-            if self.minutos_dentro < 45 and self.minutos_dentro  >= 30:
-                minutos = 3
-                importe = 24
-            if self.minutos_dentro < 60 and self.minutos_dentro  >= 45:
-                minutos = 4
-                importe = 24           
-
-            if self.horas_dentro >= 1:
-                importe = ((self.dias_dentro)*720 + (self.horas_dentro * 24)+(minutos)*6)
-
-
-
-            text_promo = "SHAKE"
 
 
         # Añade "Danado" a la descripción de la promoción si el boleto está marcado como "Danado"
@@ -1318,7 +1314,6 @@ class FormularioOperacion:
         p.cut()
 
         self.limpiar_campos()
-        self.AbrirBarrera()
         self.BoletoDentro2()
 
     def listar(self):
@@ -2622,6 +2617,87 @@ class FormularioOperacion:
 
         return pago
 
+    def Pensionados(self, event):
+        try:
+            numtarjeta = self.Placa.get()
+
+            if len(numtarjeta) == 0:
+                raise ValueError("Ingrese el número de tarjeta")
+
+            tarjeta = int(numtarjeta)
+            print(tarjeta)
+            Existe = self.operacion1.ValidarPen(tarjeta)
+
+            if len(Existe) == 0:
+                self.label_informacion.config(text="No existe Pensionado")
+                self.Placa.set("")
+                self.entryPlaca.focus()
+                return False
+            else:
+                respuesta = self.operacion1.ConsultaPensionado_entrar(Existe)
+
+                for fila in respuesta:
+                    VigAct = fila[0]
+                    Estatus = fila[1]
+                    Tolerancia = int(fila[3])
+
+                    if VigAct is None:
+                        self.label_informacion.config(text="Sin Vigencia Activa\nTajeta desactivada")
+                        self.Placa.set("")
+                        self.entryPlaca.focus()
+                        return False
+
+                    elif Estatus == 'Adentro':
+                        self.label_informacion.config(text="Ya está Adentro")
+                        self.Placa.set("")
+                        self.entryPlaca.focus()
+                        return False
+
+                    # Obtener la fecha y hora actual en formato deseado
+                    VigAct = VigAct.strftime("%Y-%m-%d %H:%M:%S")
+                    # Convertir la cadena de caracteres en un objeto datetime
+                    VigAct = datetime.strptime(VigAct, "%Y-%m-%d %H:%M:%S")
+
+                    # Obtener la fecha y hora actual en formato deseado
+                    hoy = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+                    # Convertir la cadena de caracteres en un objeto datetime
+                    hoy = datetime.strptime(hoy, "%Y-%m-%d %H:%M:%S")
+
+                    limite = VigAct + timedelta(days=Tolerancia)
+                    print(limite)
+
+                    if hoy >= limite:
+                        self.label_informacion.config(text="Vigencia Vencida")
+                        self.Placa.set("")
+                        self.entryPlaca.focus()
+                        return False
+
+                    else:
+                        Entrada = datetime.today()
+                        datos = (Existe, tarjeta, Entrada, 'Adentro')
+                        datos1 = ('Adentro', Existe)
+                        self.operacion1.MovsPensionado(datos)
+                        self.operacion1.UpdPensionado(datos1)
+
+                        self.Placa.set("")
+                        self.entryPlaca.focus()
+                        self.label_informacion.config(text="Entró pensionado")
+
+        except ValueError as e:
+            print(e)
+            traceback.print_exc()
+            self.label_informacion.config(text="Numero de tarjeta no\nvalido, leer de nuevo")
+            self.Placa.set("")
+            self.entryPlaca.focus()
+            return False
+
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            self.label_informacion.config(text="Ha ocurrido un error")
+            self.Placa.set("")
+            self.entryPlaca.focus()
+            return False
 
     def calcular_penalizacion_diaria(self, penalizacion_diaria, fecha_limite):
         """
