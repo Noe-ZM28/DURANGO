@@ -4,12 +4,18 @@ import qrcode
 from tkinter import messagebox as mb
 
 class Operacion:
+    def __init__(self):
+        self.host = "localhost"
+        self.user = "Aurelio"
+        self.password = "RG980320"
+        self.database = "Parqueadero1"
 
     def abrir(self):
-        conexion = pymysql.connect(host="localhost",
-                           user="Aurelio",
-                           passwd="RG980320",
-                           database="Parqueadero1")
+        conexion=pymysql.connect(host=self.host,
+                                 user=self.user,
+                                 passwd=self.password,
+                                 database=self.database)
+
         return conexion
 
 

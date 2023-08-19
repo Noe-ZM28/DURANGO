@@ -1,25 +1,20 @@
 from datetime import datetime, date, time, timedelta
-
 from tkinter import messagebox as mb
 
 PensionadoOpen=1
 
 from escpos.printer import *
-import qrcode
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox as mb
 from tkinter import scrolledtext as st
-from tkinter import font
+
 from tkinter import *
 from tkinter import simpledialog
-import re
-import operacion
 
-import time
+from operacion import Operacion
 import xlsxwriter
-import os
-import serial
 
 
 ###-###
@@ -32,6 +27,9 @@ from view_agregar_pensionado import View_agregar_pensionados
 from view_modificar_pensionado import View_modificar_pensionados
 import traceback
 import math
+
+import atexit
+
 contraseña_pensionados = "P4s3"
 
 valor_tarjeta = 116
@@ -40,17 +38,22 @@ penalizacion_diaria_pension = 0
 
 logo_1 = "LOGO1.jpg"
 AutoA = "AutoA.png"
+
 qr_imagen = "reducida.png"
 PROMOCIONES = ('AM ADMIN', 'PR PROVE', 'ST STARB' ,'SG SONOR', 'AT APOTE', 'SS SHAKE')
 nombre_estacionamiento = 'Durango'
 estilo = ('Arial', 12)
 
+from controller_email import main
+
 class FormularioOperacion:
     def __init__(self):
+        atexit.register(main)
+
         self.controlador_crud_pensionados = Pensionados()
         self.folio_auxiliar = None
 
-        self.operacion1=operacion.Operacion()
+        self.DB=Operacion()
         self.ventana1=tk.Tk()
         self.ventana1.title(f"{nombre_estacionamiento} COBRO")
         self.cuaderno1 = ttk.Notebook(self.ventana1)
@@ -58,7 +61,6 @@ class FormularioOperacion:
         self.ExpedirRfid()
         self.check_inputs()
         self.consulta_por_folio()
-        #self.calcular_cambio()
         self.listado_completo()
         self.interface_pensionados()
         self.cuaderno1.grid(column=0, row=0, padx=5, pady=5)
@@ -152,7 +154,7 @@ class FormularioOperacion:
 
     def agregarRegistroRFID(self):
         #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$impresion    $$$$$$$$$$$$$$$$$$$
-        MaxFolio=str(self.operacion1.MaxfolioEntrada())
+        MaxFolio=str(self.DB.MaxfolioEntrada())
         MaxFolio = MaxFolio.strip("[(,)]")
         n1 = MaxFolio
         n2 = "1"
@@ -160,13 +162,14 @@ class FormularioOperacion:
         masuno = str(masuno)
         self.MaxId.set(masuno)
 
-        folio_cifrado = self.operacion1.cifrar_folio(folio = masuno)
-        #print(f"QR entrada: {folio_cifrado}")
+        folio_cifrado = self.DB.cifrar_folio(folio = masuno)
+        # print(f"QR entrada: {folio_cifrado}")
 
         #Generar QR
-        self.operacion1.generar_QR(folio_cifrado)
+        self.DB.generar_QR(folio_cifrado)
 
         fechaEntro = datetime.today()
+
         horaentrada = str(fechaEntro)
         horaentrada=horaentrada[:19]
         self.labelhr.configure(text=(horaentrada[:-3], "Entró"))
@@ -191,12 +194,14 @@ class FormularioOperacion:
         p.text(folioZZ+'\n')
         p.image(AutoA)
 
+
+        p.set(align = "center")
         p.image(qr_imagen)
 
         p.text("--------------------------------------\n")
         p.cut()
 
-        self.operacion1.altaRegistroRFID(datos)
+        self.DB.altaRegistroRFID(datos)
         self.Placa.set('')
 
 
@@ -237,6 +242,7 @@ class FormularioOperacion:
         self.cuantopagasen=tk.StringVar()
         self.cuantopagasen.set(100)
         self.entrycuantopagasen=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.cuantopagasen)
+        #self.entrycuantopagasen.bind('<Return>',self.calcular_cambio)
         self.entrycuantopagasen.grid(column=1, row=0)
         self.elimportees=tk.StringVar()
         self.entryelimportees=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.elimportees, state="readonly")
@@ -383,7 +389,7 @@ class FormularioOperacion:
 
 
     def BoletoDentro(self):
-        respuesta=self.operacion1.Autos_dentro()
+        respuesta=self.DB.Autos_dentro()
         self.scrolledtxt.delete("1.0", tk.END)
         for fila in respuesta:
             self.scrolledtxt.insert(tk.END, "Folio num: "+str(fila[0])+"\nEntro: "+str(fila[1])[:-3]+"\nPlacas: "+str(fila[2])+"\n\n")
@@ -413,7 +419,7 @@ class FormularioOperacion:
         importe = 0
 
         # Consultar los datos correspondientes al folio
-        respuesta = self.operacion1.consulta(datos)
+        respuesta = self.DB.consulta(datos)
         if len(respuesta) > 0:
             # Establecer la descripción y precio basados en la respuesta
             self.fecha_entrada.set(respuesta[0][0])
@@ -459,9 +465,9 @@ class FormularioOperacion:
         :return: None
         """
         Boleto_perdido = mb.askokcancel("Advertencia", f"¿Esta seguro de imprimir un boleto perdido?")
-    
+
         if Boleto_perdido:
-            MaxFolio=str(self.operacion1.MaxfolioEntrada())
+            MaxFolio=str(self.DB.MaxfolioEntrada())
             MaxFolio = MaxFolio.strip("[(,)]")
             n1 = MaxFolio
             n2 = "1"
@@ -494,7 +500,7 @@ class FormularioOperacion:
             p.cut()
 
             #Agregar registro del pago a la base de datos
-            self.operacion1.altaRegistroRFID(datos)
+            self.DB.altaRegistroRFID(datos)
             self.Placa.set('')
 
         self.BoletoDentro()
@@ -521,13 +527,13 @@ class FormularioOperacion:
             self.entryfolio.focus()
             return
 
-        folio = self.operacion1.descifrar_folio(folio_cifrado = datos)
+        folio = self.DB.descifrar_folio(folio_cifrado = datos)
         self.folio.set(folio)
         folio = self.folio.get()
         self.folio_auxiliar = folio
         print(f"\nFolio descifrado: {folio}")
 
-        respuesta=self.operacion1.consulta(folio)
+        respuesta=self.DB.consulta(folio)
         if len(respuesta) == 0:
             mb.showinfo("Información", "No existe un auto con dicho código")
             self.limpiar_campos()
@@ -560,7 +566,7 @@ class FormularioOperacion:
             self.label15.configure(text=("Este Boleto ya Tiene cobro"))
 
             # Realiza una consulta con el folio seleccionado para obtener información adicional del boleto
-            respuesta = self.operacion1.consulta({self.folio.get()})
+            respuesta = self.DB.consulta({self.folio.get()})
 
             # Imprime en una caja de texto la información del boleto cuando ya ha sido cobrado
             self.scrol_datos_boleto_cobrado.delete("1.0", tk.END)
@@ -607,6 +613,7 @@ class FormularioOperacion:
         Salida = datetime.strptime(Salida, '%Y-%m-%d %H:%M:%S')
 
         self.copia_fecha_salida.set(Salida)
+
 
         # Obtiene la fecha del boleto seleccionado y realiza las conversiones necesarias
         Entrada = self.fecha_entrada.get()
@@ -687,7 +694,7 @@ class FormularioOperacion:
 
         self.elcambioes.set(cambio)
 
-        self.GuardarCobro()#manda a llamar guardar cobro para cobrarlo y guardar registro
+        self.GuardarCobro()
 
         self.Comprobante()
         self.Comprobante(titulo='CONTRA', imagen_logo=False)
@@ -758,8 +765,6 @@ class FormularioOperacion:
                 p.image(qr_imagen)
                 print("Imprime QR salida")
 
-            p.text("----------------------------\n")
-
         p.cut()
 
 
@@ -774,7 +779,7 @@ class FormularioOperacion:
         folio = self.folio.get()
 
         # Realiza una consulta con el folio seleccionado para obtener información adicional del boleto
-        respuesta = self.operacion1.consulta(folio)
+        respuesta = self.DB.consulta(folio)
 
         if len(respuesta) == 0:
             # Si no se encuentra el boleto con el folio proporcionado, muestra un mensaje de error y sale de la función
@@ -798,7 +803,7 @@ class FormularioOperacion:
         datos = (vobo, importe, TiempoTotal, Entrada, Salida, TarifaPreferente, QRPromo, folio)
 
         # Guardar el cobro en la base de datos
-        self.operacion1.guardacobro(datos)
+        self.DB.guardacobro(datos)
 
 
     def CalculaPromocion(self, event):
@@ -841,8 +846,9 @@ class FormularioOperacion:
             return
 
         # Valida si la promoción ya fue aplicada previamente
-        respuesta = self.operacion1.ValidaPromo(QRPromo)
-        if respuesta == 0:
+        respuesta = self.DB.ValidaPromo(QRPromo)
+
+        if len(respuesta) > 0:
             mb.showwarning("IMPORTANTE", "LA PROMOCION YA FUE APLICADA")
             self.promo.set('')
             self.promo_auxiliar.set('')
@@ -988,10 +994,10 @@ class FormularioOperacion:
 
             text_promo = "SNR"
 
-
         # Añade "Danado" a la descripción de la promoción si el boleto está marcado como "Danado"
         if TarifaPreferente == "Danado":
             text_promo = text_promo + TarifaPreferente
+
         # Establece el tipo de promoción y muestra el importe actualizado
         self.TarifaPreferente.set(text_promo)
         self.promo.set("")
@@ -1019,7 +1025,7 @@ class FormularioOperacion:
         tarjeta = int(numtarjeta)
 
         # Valida si existe un pensionado con ese número de tarjeta
-        respuesta = self.operacion1.ValidarTarj(tarjeta)
+        respuesta = self.DB.ValidarTarj(tarjeta)
 
         if len(respuesta) == 0:
             mb.showwarning("IMPORTANTE", "No existe Pensionado para ese Num de Tarjeta")
@@ -1049,7 +1055,7 @@ class FormularioOperacion:
             return
 
         # Consulta la hora de entrada del pensionado
-        entrada = self.operacion1.consultar_UpdMovsPens(Existe)
+        entrada = self.DB.consultar_UpdMovsPens(Existe)
         entrada = entrada[0][0]
 
         # Obtener la fecha y hora actual en formato deseado
@@ -1076,10 +1082,10 @@ class FormularioOperacion:
         datos1 = ('Afuera', Existe)
 
         # Actualizar la tabla de movimientos del pensionado
-        self.operacion1.UpdMovsPens(datos)
+        self.DB.UpdMovsPens(datos)
 
         # Actualizar el estatus del pensionado
-        self.operacion1.UpdPens2(datos1)
+        self.DB.UpdPens2(datos1)
 
         self.NumTarjeta2.set("")               
         self.entryNumTarjeta2.focus()
@@ -1200,6 +1206,7 @@ class FormularioOperacion:
         self.boton4.grid(column=2, row=4, padx=4, pady=4)
         self.scrolledtext1=st.ScrolledText(self.labelframe1, width=28, height=4)
         self.scrolledtext1.grid(column=0,row=1, padx=1, pady=1)
+        
         self.label7=ttk.Label(self.labelframe5, text="Mes :")
         self.label7.grid(column=0, row=0, padx=1, pady=1)
         self.label8=ttk.Label(self.labelframe5, text="Ano :")
@@ -1232,7 +1239,7 @@ class FormularioOperacion:
         self.BoletoDentro2()
 
     def BoletoDentro2(self):
-        respuesta=self.operacion1.Autos_dentro()
+        respuesta=self.DB.Autos_dentro()
         self.scrolledtxt2.delete("1.0", tk.END)
         for fila in respuesta:
             self.scrolledtxt2.insert(tk.END, "Folio num: "+str(fila[0])+"\nEntro: "+str(fila[1])[:-3]+"\nPlacas: "+str(fila[2])+"\n\n")
@@ -1243,7 +1250,7 @@ class FormularioOperacion:
         Numcorte=int(Numcorte)
         Numcorte=str(Numcorte)
 
-        respuesta=self.operacion1.desglose_cobrados(Numcorte)
+        respuesta=self.DB.desglose_cobrados(Numcorte)
         self.scrolledtxt2.delete("1.0", tk.END)
 
         p.text("El Numero de corte es "+Numcorte+'\n')
@@ -1283,7 +1290,7 @@ class FormularioOperacion:
         self.folio.set(folio)
 
         folio = self.folio.get()
-        respuesta = self.operacion1.consulta(folio)
+        respuesta = self.DB.consulta(folio)
 
         if len(respuesta) == 0:
             self.fecha_entrada.set('')
@@ -1318,29 +1325,29 @@ class FormularioOperacion:
 
         self.TarifaPreferente.set("CDO")
 
+        self.GuardarCobro()
+
         self.Comprobante(titulo='Boleto Cancelado', imagen_logo=False)
 
-
-        self.GuardarCobro()
         self.FolioCancelado.set("")
-
-        p.cut()
 
         self.limpiar_campos()
 
 
     def listar(self):
-        respuesta=self.operacion1.recuperar_todos()
+        respuesta=self.DB.recuperar_todos()
         self.scrolledtext1.delete("1.0", tk.END)
         for fila in respuesta:
             self.scrolledtext1.insert(tk.END, "Entrada num: "+str(fila[0])+"\nEntro: "+str(fila[1])[:-3]+"\nSalio: "+str(fila[2])[:-3]+"\n\n")
 
     def listar1(self):
-        respuesta=self.operacion1.recuperar_sincobro()
+        respuesta=self.DB.recuperar_sincobro()
         self.scrolledtext1.delete("1.0", tk.END)
         #respuesta=str(respuesta)
         for fila in respuesta:
             self.scrolledtext1.insert(tk.END, "Entrada num: "+str(fila[0])+"\nEntro: "+str(fila[1])[:-3]+"\nSalio: "+str(fila[2])[:-3]+"\nImporte: "+str(fila[3])+"\n\n")
+            ###p = Usb(0x04b8, 0x0202, 0)
+            #p = Usb(0x04b8, 0x0e15, 0)#esta es la impresora con sus valores que se obtienen con lsusb
             p.text('Entrada Num :')
             p.text(str(fila[0]))
             p.text('\n')
@@ -1357,10 +1364,10 @@ class FormularioOperacion:
             p.cut()
 
     def Calcular_Corte(self):
-        respuesta=self.operacion1.corte()
+        respuesta=self.DB.corte()
         self.ImporteCorte.set(respuesta)
         ##obtengamo la fechaFin del ultimo corte
-        ultiCort1=str(self.operacion1.UltimoCorte())
+        ultiCort1=str(self.DB.UltimoCorte())
         #mb.showinfo("msj uno",ultiCort1)
         startLoc = 20
         endLoc = 43
@@ -1386,7 +1393,7 @@ class FormularioOperacion:
         self.Puertoycontar()
 
         ######Obtenemos los datos del Cajero en Turno
-        cajero=self.operacion1.CajeroenTurno()
+        cajero=self.DB.CajeroenTurno()
         for fila in cajero:
             cajero1 = fila[0]
             nombre2 = fila[1]
@@ -1398,9 +1405,9 @@ class FormularioOperacion:
 
 
         datos=(hoy1, cajero1)
-        self.operacion1.Cierreusuario(datos)
+        self.DB.Cierreusuario(datos)
         dato=(cajero1)
-        self.operacion1.NoAplicausuario(dato)
+        self.DB.NoAplicausuario(dato)
         ##la fecha final de este corte que es la actual
         fechaDECorte = str(self.FechaCorte.get(),)
         fechaDECorte = datetime.strptime(fechaDECorte, '%Y-%m-%d %H:%M:%S' )
@@ -1412,15 +1419,15 @@ class FormularioOperacion:
         ImpCorte2 =str(self.ImporteCorte.get(),)
         Im38=ImpCorte2.strip('(,)')
         AEE = 0
-        maxnumid=str(self.operacion1.MaxfolioEntrada())
+        maxnumid=str(self.DB.MaxfolioEntrada())
         maxnumid = "".join([x for x in maxnumid if x.isdigit()])#con esto solo obtenemos los numeros
         maxnumid=int(maxnumid)
         maxnumid=str(maxnumid)
         pasa = str(self.BDentro.get(),)
         NumBolQued = pasa.strip('(),')
         datos=(Im38, fechaInicio, fechaDECorte,AEE,maxnumid,NumBolQued)
-        self.operacion1.GuarCorte(datos)
-        maxnum1=str(self.operacion1.Maxfolio_Cortes())
+        self.DB.GuarCorte(datos)
+        maxnum1=str(self.DB.Maxfolio_Cortes())
         maxnum = "".join([x for x in maxnum1 if x.isdigit()])#con esto solo obtenemos los numeros
         maxnum=int(maxnum)
         maxnum=str(maxnum)
@@ -1429,6 +1436,7 @@ class FormularioOperacion:
         self.label4.configure(text=("Numero de corte",maxnum))
 
         # p.image(logo_1)
+
         p.text(f" Est {nombre_estacionamiento} CORTE Num "+maxnum+"\n")
         p.text('IMPORTE: $ '+Im38+'\n')
         ultiCort1=str(self.FechUCORTE.get(),)
@@ -1448,7 +1456,7 @@ class FormularioOperacion:
             DDESEM = 'SABADO'
         if DDESEM == 6:
             DDESEM = 'DOMINGO'
-                                            
+
         ultiCort4= datetime.strptime(ultiCort1, '%Y-%m-%d %H:%M:%S')
         ultiCort5 = datetime.strftime(ultiCort4, '%D a las %H:%M:%S')
         p.text('Inicio: ')
@@ -1464,7 +1472,7 @@ class FormularioOperacion:
         p.text(' ') 
         p.text(str(fechaDECorte))
         p.text('\n')
-        MaxFolio=str(self.operacion1.MaxfolioEntrada())
+        MaxFolio=str(self.DB.MaxfolioEntrada())
         MaxFolio = MaxFolio.strip("[(,)]")
         BEDespuesCorteImpre = str(self.BEDespuesCorte.get(),)
         BEDespuesCorteImpre = BEDespuesCorteImpre.strip("[(,)]")
@@ -1475,7 +1483,7 @@ class FormularioOperacion:
         p.text("Cajero en Turno: "+nombre2+"\n")
         p.text("Turno: "+str(turno1)+"\n")
         dato =(inicio1)
-        inicios = self.operacion1.IniciosdeTurno(dato)
+        inicios = self.DB.IniciosdeTurno(dato)
         for fila in inicios:
             p.text("Sesion "+fila[1]+": "+str(fila[0])+"\n")
                                         
@@ -1485,7 +1493,6 @@ class FormularioOperacion:
         p.text('Boletos Expedidos: '+BEDespuesCorteImpre+'\n')
         BAnterioresImpr=str(self.BAnteriores.get(),)#######
         p.text("Boletos Turno Anterior: "+BAnterioresImpr+"\n")
-
         BDentroImp = str(self.BDentro.get(),)
         p.text('Boletos Dejados: '+str(BDentroImp)+'\n')
         AutosEnEstacImpre = str(self.AutosEnEstacionamiento.get(),)
@@ -1494,9 +1501,9 @@ class FormularioOperacion:
 
         self.ImporteCorte.set("")
 
-        self.operacion1.ActualizarEntradasConcorte(ActEntradas)
+        self.DB.ActualizarEntradasConcorte(ActEntradas)
         vobo='ant'
-        self.operacion1.NocobradosAnt(vobo)
+        self.DB.NocobradosAnt(vobo)
         ponercorte =int(maxnum) 
         #mb.showinfo("primero",ponercorte)
         self.CortesAnteri.set(ponercorte)
@@ -1505,7 +1512,7 @@ class FormularioOperacion:
         Numcorte=int(Numcorte)
         Numcorte=str(Numcorte)
 
-        respuesta=self.operacion1.desglose_cobrados(Numcorte)
+        respuesta=self.DB.desglose_cobrados(Numcorte)
         self.scrolledtxt2.delete("1.0", tk.END)
 
 
@@ -1524,21 +1531,21 @@ class FormularioOperacion:
         p.text("----------------------------------\n")
 
         # Obtiene la cantidad de boletos perdidos generados
-        Boletos_perdidos_generados = self.operacion1.Boletos_perdidos_generados()
+        Boletos_perdidos_generados = self.DB.Boletos_perdidos_generados()
         Boletos_perdidos_generados = Boletos_perdidos_generados[0][0]
 
         # Obtiene el desglose de los boletos perdidos generados
-        Boletos_perdidos_generados_desglose = self.operacion1.Boletos_perdidos_generados_desglose()
+        Boletos_perdidos_generados_desglose = self.DB.Boletos_perdidos_generados_desglose()
 
         # Obtiene la cantidad de boletos perdidos cobrados
-        Boletos_perdidos_cobrados = self.operacion1.Boletos_perdidos_cobrados(Numcorte)
+        Boletos_perdidos_cobrados = self.DB.Boletos_perdidos_cobrados(Numcorte)
         Boletos_perdidos_cobrados = Boletos_perdidos_cobrados[0][0]
 
         # Obtiene el desglose de los boletos perdidos cobrados
-        Boletos_perdidos_cobrados_desglose = self.operacion1.Boletos_perdidos_cobrados_desglose(Numcorte)
+        Boletos_perdidos_cobrados_desglose = self.DB.Boletos_perdidos_cobrados_desglose(Numcorte)
 
         # Obtiene la cantidad de boletos perdidos no cobrados
-        Boletos_perdidos_no_cobrados = self.operacion1.Boletos_perdidos_no_cobrados()
+        Boletos_perdidos_no_cobrados = self.DB.Boletos_perdidos_no_cobrados()
         Boletos_perdidos_no_cobrados = Boletos_perdidos_no_cobrados[0][0]
 
         # Si hay boletos perdidos generados, cobrados o no cobrados, se procede a imprimir el reporte
@@ -1571,7 +1578,7 @@ class FormularioOperacion:
             p.text("----------------------------------\n")
 
         # Obtiene la cantidad e importes de las pensiones para el corte actual
-        respuesta = self.operacion1.total_pensionados_corte(Numcorte)
+        respuesta = self.DB.total_pensionados_corte(Numcorte)
 
         # Si hay pensionados en el corte, se procede a imprimir la sección correspondiente
         if len(respuesta) > 0:
@@ -1579,9 +1586,8 @@ class FormularioOperacion:
             p.text("Cuantos - Concepto - ImporteTotal " + '\n')
             for fila in respuesta:
                 p.text(f"   {str(fila[0])}   -  {str(fila[1])}   -   ${str(fila[2])}\n")
-        else:
-            # Si no hay pensionados en el corte, se imprime un separador
-            p.text("----------------------------------\n")
+            else:
+                p.text("----------------------------------\n")
 
         # Imprime un separador final
         p.text("----------------------------------\n")
@@ -1589,12 +1595,14 @@ class FormularioOperacion:
         # Corta el papel
         p.cut()
 
+        p.close()
+
         # Cierra el programa al final del reporte
         self.Cerrar_Programa()
 
 
     def Cerrar_Programa(self):
-        self.ventana1.destroy()  
+        self.ventana1.destroy()
 
 
 
@@ -1738,35 +1746,38 @@ class FormularioOperacion:
                 mb.showwarning("ERROR", 'Contrasena Incorrecta')
 
 
+
         
     def Puertoycontar(self):
         
-        CuantosBoletosCobro=str(self.operacion1.CuantosBoletosCobro())
+        CuantosBoletosCobro=str(self.DB.CuantosBoletosCobro())
         CuantosBoletosCobro = CuantosBoletosCobro.strip('(),')
         self.BoletosCobrados.set(CuantosBoletosCobro)
-        MaxFolioCorte=str(self.operacion1.Maxfolio_Cortes())
+        MaxFolioCorte=str(self.DB.Maxfolio_Cortes())
         MaxFolioCorte=MaxFolioCorte.strip('(),')
-        QuedadosBol=str(self.operacion1.Quedados_Sensor(MaxFolioCorte))
+        QuedadosBol=str(self.DB.Quedados_Sensor(MaxFolioCorte))
         QuedadosBol=QuedadosBol.strip('(),')
         self.BAnteriores.set(QuedadosBol)
-        maxNumidIni=str(self.operacion1.MaxnumId())
+        maxNumidIni=str(self.DB.MaxnumId())
         maxNumidIni = "".join([x for x in maxNumidIni if x.isdigit()])#con esto solo obtenemos los numeros
         maxNumidIni=int(maxNumidIni)
-        maxFolioEntradas= str(self.operacion1.MaxfolioEntrada())
+        maxFolioEntradas= str(self.DB.MaxfolioEntrada())
         maxFolioEntradas = "".join([x for x in maxFolioEntradas if x.isdigit()])#con esto solo obtenemos los numero
         maxFolioEntradas=int(maxFolioEntradas)
         BEDCorte=maxFolioEntradas-maxNumidIni
         BEDCorte=str(BEDCorte)
         self.BEDespuesCorte.set(BEDCorte)
-        CuantosAutosdentro=str(self.operacion1.CuantosAutosdentro())
-        MaxFolioCorte=str(self.operacion1.Maxfolio_Cortes())
+        CuantosAutosdentro=str(self.DB.CuantosAutosdentro())
+        MaxFolioCorte=str(self.DB.Maxfolio_Cortes())
         MaxFolioCorte=MaxFolioCorte.strip('(),')
-        dentroCorte=str(self.operacion1.Quedados_Sensor(MaxFolioCorte))
+        dentroCorte=str(self.DB.Quedados_Sensor(MaxFolioCorte))
         CuantosAutosdentro = CuantosAutosdentro.strip('(),')
         dentroCorte = dentroCorte.strip('(),')
         self.BDentro.set(CuantosAutosdentro)
         self.Autos_Anteriores.set(dentroCorte)
-
+        #AutosAnteriores = int(self.Autos_Anteriores.get(),)
+        #Cuantos_hay_dentro = ((AutosAnteriores + EntradasSen) - SalidasSen)
+        #self.AutosEnEstacionamiento.set(Cuantos_hay_entro)
 
     ###################### Fin de Pagina2 Inicio Pagina3 ###############################
     def interface_pensionados(self):
@@ -1969,14 +1980,14 @@ class FormularioOperacion:
             return
 
         numtarjeta = int(numtarjeta)
-        resultado = self.operacion1.ValidarRFID(numtarjeta)
+        resultado = self.DB.ValidarRFID(numtarjeta)
 
         if not resultado:
             mb.showwarning("IMPORTANTE", "No existe Cliente para ese Num de Tarjeta")
             self.limpiar_datos_pago()
             return
 
-        respuesta = self.operacion1.ConsultaPensionado(resultado)
+        respuesta = self.DB.ConsultaPensionado(resultado)
 
         if not respuesta:
             mb.showwarning("IMPORTANTE", "No se encontró información para el cliente")
@@ -2076,7 +2087,7 @@ class FormularioOperacion:
         nummes = int(self.meses_pago.get())
 
         try:
-            usuario = self.operacion1.nombre_usuario_activo()
+            usuario = self.DB.nombre_usuario_activo()
             usuario = str(usuario[0][0])
             # usuario = "prueba"
 
@@ -2090,14 +2101,14 @@ class FormularioOperacion:
                 return
 
             tarjeta = int(numtarjeta)
-            Existe = self.operacion1.ValidarRFID(tarjeta)
+            Existe = self.DB.ValidarRFID(tarjeta)
 
             if not Existe:
                 mb.showwarning("IMPORTANTE", "No existe Cliente para ese Num de Tarjeta")
                 self.caja_texto_numero_tarjeta.focus()
                 return
 
-            respuesta = self.operacion1.ConsultaPensionado(Existe)
+            respuesta = self.DB.ConsultaPensionado(Existe)
 
             if not respuesta:
                 mb.showwarning("IMPORTANTE", "No se encontró información para el cliente")
@@ -2156,17 +2167,17 @@ class FormularioOperacion:
                 pago = (monto * nummes) + penalizacion_pension
 
             if cortesia == "Si":NvaVigencia = self.nueva_vigencia(
-                                                                    fecha= VigAct,
-                                                                    cortesia="Si")
+                    fecha= VigAct,
+                    cortesia="Si")
             else:NvaVigencia = self.nueva_vigencia(
-                                                    fecha= VigAct,
-                                                    meses=nummes)
+                    fecha= VigAct,
+                    meses=nummes)
 
             datos = (Existe, tarjeta, fechaPago, NvaVigencia, nummes, pago, self.tipo_pago_)
             datos1 = ("Activo", NvaVigencia, Existe)
 
-            self.operacion1.CobrosPensionado(datos)
-            self.operacion1.Upd_Pensionado(datos1)
+            self.DB.CobrosPensionado(datos)
+            self.DB.UpdPensionado(datos1)
 
             self.imprimir_comprobante_pago_pensionado(
                 numero_tarjeta=tarjeta,
@@ -2201,7 +2212,7 @@ class FormularioOperacion:
         y detalles en un ScrolledText en la interfaz gráfica.
         """
         self.scroll_pensionados_dentro.configure(state="normal")
-        respuesta=self.operacion1.TreaPenAdentro()
+        respuesta=self.DB.TreaPenAdentro()
         self.scroll_pensionados_dentro.delete("1.0", tk.END)
         cont=0
         for fila in respuesta:
@@ -2237,10 +2248,12 @@ class FormularioOperacion:
         Raises:
             None
         """
+        # Establece la alineación del texto al centro
+        p.set(align="center")
 
         p.text("----------------------------------\n")
         # Agrega un encabezado al comprobante
-        p.text("        Comprobante de pago\n\n")
+        p.text("Comprobante de pago\n\n")
         
         # Establece la alineación del texto a la izquierda
         p.set(align="left")
@@ -2382,7 +2395,7 @@ class FormularioOperacion:
             self.entryPonerFOLIO.focus()
             return
 
-        respuesta = self.operacion1.consulta(datos)
+        respuesta = self.DB.consulta(datos)
         if len(respuesta) == 0:
             self.limpiar_campos()
             mb.showinfo("Información", "No existe un auto con dicho código")
@@ -2720,7 +2733,9 @@ class FormularioOperacion:
 
         # Calcular la cantidad de días de atraso
         fecha_atrasada = hoy - fecha_limite
-        print(f"fecha atrasada: {fecha_atrasada}")
+
+        # print(f"fecha atrasada: {fecha_atrasada}")
+
         dias_atrasados = fecha_atrasada.days + 1  # Se suma 1 día para corregir fecha
         #if dias_atrasados == 0:dias_atrasados = 1
 
@@ -2761,7 +2776,7 @@ class FormularioOperacion:
         ventana.protocol("WM_DELETE_WINDOW", lambda: cerrar_ventana())
 
         # Deshabilita los botones de minimizar y maximizar
-        #ventana.attributes('-toolwindow', True)
+        # ventana.attributes('-toolwindow', True)
 
         # Crear un Frame para contener la tabla y la etiqueta
         frame_tabla = tk.Frame(ventana)
@@ -2803,7 +2818,6 @@ class FormularioOperacion:
         def cerrar_ventana():
             # Obtener la fecha y hora actual en formato deseado
             hoy = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            hoy = datetime.strptime(hoy, "%Y-%m-%d %H:%M:%S")
 
             self.controlador_crud_pensionados.desactivar_tarjetas_expiradas(hoy)
             self.ver_pensionados()
@@ -2847,9 +2861,6 @@ class FormularioOperacion:
         """
         self.importe.set(text_importe)
         self.IImporte.config(text=self.importe.get())
-
-
-
 
 # aplicacion1=FormularioOperacion()
 
