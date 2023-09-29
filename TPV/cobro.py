@@ -1628,7 +1628,7 @@ class FormularioOperacion:
                         Libro = '/REPORTE/Rpte Corte '+ str(mes)+'-'+str(Ano)+'  '+str(datetime.now().date())+'.xlsx'
                         datos=(mes, Ano)
 
-                        CorteMin=self.operacion1.Cortes_Min(datos)
+                        CorteMin=self.DB.Cortes_Min(datos)
 
                         for fila in CorteMin:
                             UltFecha=str(fila[0])    
@@ -1636,23 +1636,23 @@ class FormularioOperacion:
 
                         datos=(IniFecha)
 
-                        CorteIni=self.operacion1.Cortes_Folio(datos)
+                        CorteIni=self.DB.Cortes_Folio(datos)
                         for fila in CorteIni:
                             CorteIni2=fila[0]
 
                         #datos=(UltCorte)
                         datos=(UltFecha)
-                        CorteFin=self.operacion1.Cortes_Folio(datos)
+                        CorteFin=self.DB.Cortes_Folio(datos)
                         for fila in CorteFin:
                             CorteFin2=fila[0]
                       
                         #Obtnemos los Registros entre estos dos Folios para el cuerpo del reporte       
                         datos=(CorteIni2, CorteFin2)
                         #datos=(IniCorte, UltCorte)
-                        Registros=self.operacion1.Registros_corte(datos)
-                        TotalesCorte=self.operacion1.Totales_corte(datos)
+                        Registros=self.DB.Registros_corte(datos)
+                        TotalesCorte=self.DB.Totales_corte(datos)
                         #mb.showinfo("msj dos",'Un paso antes de Resumen Promo')
-                        ResumenPromo=self.operacion1.Resumen_promo(datos)# def Resumen_promo(self, datos1):
+                        ResumenPromo=self.DB.Resumen_promo(datos)# def Resumen_promo(self, datos1):
                         #mb.showinfo("msj dos", ResumenPromo)#'Excelente paso Resumen Promo'
                         workbook = xlsxwriter.Workbook(Libro)
                         worksheet = workbook.add_worksheet('CORTE')
@@ -2641,7 +2641,7 @@ class FormularioOperacion:
 
             tarjeta = int(numtarjeta)
             print(tarjeta)
-            Existe = self.operacion1.ValidarPen(tarjeta)
+            Existe = self.DB.ValidarPen(tarjeta)
 
             if len(Existe) == 0:
                 self.label_informacion.config(text="No existe Pensionado")
@@ -2649,7 +2649,7 @@ class FormularioOperacion:
                 self.entryPlaca.focus()
                 return False
             else:
-                respuesta = self.operacion1.ConsultaPensionado_entrar(Existe)
+                respuesta = self.DB.ConsultaPensionado_entrar(Existe)
 
                 for fila in respuesta:
                     VigAct = fila[0]
@@ -2691,8 +2691,8 @@ class FormularioOperacion:
                         Entrada = datetime.today()
                         datos = (Existe, tarjeta, Entrada, 'Adentro')
                         datos1 = ('Adentro', Existe)
-                        self.operacion1.MovsPensionado(datos)
-                        self.operacion1.UpdPensionado(datos1)
+                        self.DB.MovsPensionado(datos)
+                        self.DB.UpdPensionado(datos1)
 
                         self.Placa.set("")
                         self.entryPlaca.focus()
