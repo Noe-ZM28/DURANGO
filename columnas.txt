@@ -1,0 +1,5 @@
+ALTER TABLE MovimientosPens ADD Corte INT(10) NULL DEFAULT NULL AFTER `Estatus`;
+
+ALTER TABLE Cortes ADD Pensionados_Quedados INT(10) NULL DEFAULT NULL AFTER `NumBolQued`;
+
+

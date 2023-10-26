@@ -44,14 +44,6 @@ class Operacion:
         cone.close()
         return cursor.fetchall()  
 
-    def BolconCobro(self, datos):
-        cone=self.abrir()
-        cursor=cone.cursor()
-        sql="select Importe, Salida, TiempoTotal from Entradas where id=%s"
-       #sql="select descripcion, precio from articulos where codigo=%s"
-        cursor.execute(sql, datos)
-        cone.close()
-        return cursor.fetchall()  
     def consulta(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
@@ -220,7 +212,7 @@ class Operacion:
     def GuarCorte(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
-        sql="insert into Cortes(Importe, FechaIni, FechaFin,Quedados,idInicial,NumBolQued) values (%s,%s,%s,%s,%s,%s)"
+        sql="insert into Cortes(Importe, FechaIni, FechaFin,Quedados,idInicial,NumBolQued, Pensionados_Quedados) values (%s,%s,%s,%s,%s,%s,%s)"
         #sql = "update Entradas set CorteInc = 1 WHERE Importe > 0"
         cursor.execute(sql,datos)
         cone.commit()
@@ -228,35 +220,23 @@ class Operacion:
     def UltimoCorte(self):
         cone=self.abrir()
         cursor=cone.cursor()
-        sql="select min(inicio) from MovsUsuarios where CierreCorte is null;"
+        sql="select max(FechaFin) from Cortes;"
         #sql="select max(FechaFin) from Cortes;"
         cursor.execute(sql)
         cone.close()
         return cursor.fetchall()
-    
- #####Nuevo rpte Corte 19abr22
-    def Cortes_Max(self, datos):
+        
+    def Cortes_MaxMin(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
-        sql="SELECT max(Salida), max(Corteinc) FROM Entradas where MONTH(Salida)=%s AND YEAR(Salida)=%s "
-        #sql="SELECT max(FechaFin), min(FechaFin) FROM Cortes where MONTH(FechaFin)=%s AND YEAR(FechaFin)=%s " 
-        cursor.execute(sql,datos)
-        cone.close()
-        return cursor.fetchall()
-    def Cortes_Min(self, datos):
-        cone=self.abrir()
-        cursor=cone.cursor()
-        sql="SELECT max(FechaIni), min(FechaIni) FROM Cortes where MONTH(FechaIni)=%s AND YEAR(FechaIni)=%s " 
-        #sql="SELECT min(Entrada),min(Corteinc) FROM Entradas where MONTH(Entrada)=%s AND YEAR(Entrada)=%s AND CorteInc > 0 "
-        #sql="SELECT max(FechaFin), min(FechaFin) FROM Cortes where MONTH(FechaFin)=%s AND YEAR(FechaFin)=%s " 
+        sql="SELECT max(FechaFin), min(FechaFin) FROM Cortes where MONTH(FechaFin)=%s AND YEAR(FechaFin)=%s " 
         cursor.execute(sql,datos)
         cone.close()
         return cursor.fetchall()
     def Cortes_Folio(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
-        sql="SELECT Folio FROM Cortes where FechaIni=%s"
-        #sql="SELECT FechaIni, FechaFin FROM Cortes where Folio=%s" 
+        sql="SELECT Folio FROM Cortes where FechaFin=%s" 
         cursor.execute(sql,datos)
         cone.close()
         return cursor.fetchall()
@@ -285,7 +265,7 @@ class Operacion:
         cursor.execute(sql,datos1)
         cone.close()
         return cursor.fetchall()   
-#####USUARIOS###
+ #####USUARIOS###
 
     def ConsultaUsuario(self, datos):
         cone=self.abrir()
@@ -534,7 +514,6 @@ class Operacion:
         cursor.execute(sql, datos)
         cone.commit()
         cone.close()
-
     def ConsultaPensionado(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
@@ -567,7 +546,6 @@ class Operacion:
         cursor.execute(sql, datos)
         cone.commit()
         cone.close()
-
     def UpdPens2(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
@@ -590,6 +568,7 @@ class Operacion:
         cursor.execute(sql)
         cone.close()
         return cursor.fetchall()  
+
     def nombre_usuario_activo(self):
         """
         Esta función realiza una consulta a la base de datos para obtener el nombre del usuario que esta activo.
@@ -681,10 +660,11 @@ class Operacion:
     def MovsPensionado(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
-        sql="INSERT INTO MovimientosPens(idcliente, num_tarjeta, Entrada, Estatus) values (%s,%s,%s,%s)"
+        sql="INSERT INTO MovimientosPens(idcliente, num_tarjeta, Entrada, Estatus, Corte) values (%s,%s,%s,%s,%s)"
         cursor.execute(sql,datos)
         cone.commit()
         cone.close()
+
 
     def consultar_UpdMovsPens(self, datos):
         cone=self.abrir()
@@ -699,7 +679,7 @@ class Operacion:
     def ConsultaPensionado_entrar(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
-        sql="SELECT Fecha_vigencia, Estatus, Vigencia, Tolerancia FROM Pensionados where id_cliente=%s"
+        sql="SELECT Fecha_vigencia, Estatus, Vigencia, Tolerancia, Placas, Nom_cliente, Apell1_cliente, Apell2_cliente FROM Pensionados where id_cliente=%s"
         cursor.execute(sql,datos)
         cone.close()
         return cursor.fetchall()

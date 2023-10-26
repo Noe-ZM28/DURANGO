@@ -1,3 +1,6 @@
+import qrcode
+from escpos.printer import Usb, USBNotFoundError
+
 from tkinter import messagebox as mb
 import tkinter as tk
 from tkinter import ttk
@@ -8,8 +11,9 @@ import traceback
 
 class View_agregar_pensionados:
     """Clase de la vista para agregar pensionados."""
-    def __init__(self):
+    def __init__(self, nombre_estacionamiento:str):
         """Inicializa una instancia de la clase ViewAgregarPensionados y crea la ventana principal de la interfaz."""
+        self.nombre_estacionamiento = nombre_estacionamiento
         self.query = Pensionados()
 
         # Crea la ventana principal
@@ -18,13 +22,15 @@ class View_agregar_pensionados:
         # Se elimina la funcionalidad del botón de cerrar
         self.panel_crud.protocol("WM_DELETE_WINDOW", lambda: self.desconectar())
 
-        self.panel_crud.title(f'Agregar pensionado')
+        self.panel_crud.title(f'Agregar pensionado - {self.nombre_estacionamiento}')
 
         # Configura la columna principal del panel para que use todo el espacio disponible
         self.panel_crud.columnconfigure(0, weight=1)
 
         # Crea las variables para los datos del pensionado
         self.variable_numero_tarjeta = StringVar()
+        self.variable_numero_tarjeta.set(self.query.get_QR_id())
+
         self.variable_nombre = StringVar()
         self.variable_apellido_1 = StringVar()
         self.variable_apellido_2 = StringVar()
@@ -93,9 +99,9 @@ class View_agregar_pensionados:
         seccion_datos_personales_pensionado.grid(row=2, column=0,padx=5, pady=5, sticky=tk.NW)
 
 
-        etiqueta_numero_tarjeta = ttk.Label(seccion_datos_personales_pensionado, text='Número de tarjeta: ')
+        etiqueta_numero_tarjeta = ttk.Label(seccion_datos_personales_pensionado, text='Número de tarjeta/Tarjeton: ')
         etiqueta_numero_tarjeta.grid(row=0, column=0, padx=5, pady=5, sticky=tk.NW)
-        self.campo_numero_tarjeta = ttk.Entry(seccion_datos_personales_pensionado, textvariable=self.variable_numero_tarjeta)
+        self.campo_numero_tarjeta = ttk.Entry(seccion_datos_personales_pensionado, textvariable=self.variable_numero_tarjeta, state="disabled")
         self.campo_numero_tarjeta.grid(row=0, column=1, padx=5, pady=5)
 
         etiqueta_nombre_pensionado = ttk.Label(seccion_datos_personales_pensionado, text='Nombre: ')
@@ -173,7 +179,6 @@ class View_agregar_pensionados:
         seccion_datos_pension = tk.LabelFrame(seccion_derecha, text="Datos de la pension")
         seccion_datos_pension.grid(row=1, column=0,padx=5, pady=5, sticky=tk.NW)
 
-
         etiqueta_monto_dato_pension = ttk.Label(seccion_datos_pension, text='Monto X Mes: ')
         etiqueta_monto_dato_pension.grid(row=0, column=0, padx=5, pady=5, sticky=tk.NW)
         self.campo_monto_dato_pension = ttk.Entry(seccion_datos_pension, textvariable=self.variable_monto)
@@ -197,6 +202,35 @@ class View_agregar_pensionados:
         boton_agregar_pensionado.grid(row=5, column=0, padx=5, pady=5)
 
         self.campo_numero_tarjeta.focus()
+
+    def generar_QR_pensionado(self):
+        QR = f"Pension-{self.nombre_estacionamiento}-{self.variable_numero_tarjeta.get()}"
+
+        name_image = f"{QR}_{self.variable_placas.get()}_{self.variable_nombre.get()}.png".replace(' ', '_')
+        path = f"../QR_pensiones/{name_image}"
+
+        self.generar_QR(QR_info=QR, path=path, zise=(600, 600))
+
+        qr_pension = 'QR_pension.png'
+        self.generar_QR(QR_info=QR, path=qr_pension)
+
+        # Instanciar el objeto Usb para imprimir el resultado
+        printer = Usb(0x04b8, 0x0e15, 0)
+
+        # Alinea al centro el texto
+        printer.set(align = "center")
+        printer.text("QR para activar pension\n")
+        # Imprimir separadores y mensaje de resultado en la consola
+        printer.text("-" * 30 + "\n")
+        printer.image(qr_pension)
+        print("imprime QR")
+        printer.text("-" * 30 + "\n")
+        printer.text(f"Placas: {self.variable_placas.get()}\n")
+        printer.text(f"Nombre: {self.variable_nombre.get()}\n")
+        printer.text(f"ID: {QR}\n")
+        printer.cut()
+        printer.close()
+
 
     def agregar_pensionado(self):
         """Agrega un nuevo pensionado con los datos ingresados."""
@@ -223,14 +257,6 @@ class View_agregar_pensionados:
             variable_tolerancia = 5
             variable_estatus = "Inactiva"
 
-            try:
-                variable_numero_tarjeta = int(variable_numero_tarjeta)
-
-            except Exception as e:
-                traceback.print_exc()
-                mb.showerror("Error", "Ingresa un numero de tarjeta valido")
-                self.campo_numero_tarjeta.focus()
-                return
 
             try:
                 variable_monto = int(variable_monto)
@@ -262,6 +288,7 @@ class View_agregar_pensionados:
 
             if len(resultado) == 0:
                 self.query.agregar_pensionados(datos_pensionado)
+                self.generar_QR_pensionado()
                 mb.showinfo("Información", "El pensionado fue añadido correctamente, realice su pago de pensión para activar la tarjeta")
                 self.desconectar()
             else:
@@ -288,4 +315,20 @@ class View_agregar_pensionados:
         self.panel_crud.quit()
         self.panel_crud.destroy()
 
-#ViewAgregarPensionados()
+    def generar_QR(self, QR_info: str, path: str = "reducida.png", zise:tuple = (320, 320)) -> None:
+        """Genera un código QR a partir de la información dada y lo guarda en un archivo de imagen.
+
+        Args:
+            QR_info (str): La información para generar el código QR.
+            path (str, optional): La ruta y el nombre del archivo de imagen donde se guardará el código QR, por defecto es "reducida.png".
+        """
+        # Generar el código QR
+        img = qrcode.make(QR_info)
+
+        # Redimensionar el código QR a un tamaño específico
+        img = img.get_image().resize(zise)
+
+        # Guardar la imagen redimensionada en un archivo
+        img.save(path)
+
+# View_agregar_pensionados()
