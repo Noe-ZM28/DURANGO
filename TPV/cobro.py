@@ -39,13 +39,14 @@ AutoA = "AutoA.png"
 
 qr_imagen = "reducida.png"
 PROMOCIONES = ('AM ADMIN', 'PR PROVE', 'ST STARB' ,'SG SONOR', 'AT APOTE', 'SS SHAKE')
-nombre_estacionamiento = 'Durango'
+nombre_estacionamiento = 'Durango 205'
 
 estilo = ('Arial', 12)
 font_entrada = ('Arial', 20)
 font_entrada_negritas = ('Arial', 20, 'bold')
 font_mensaje = ('Arial', 40)
 font_reloj = ('Arial', 65)
+font_cancel = ('Arial', 15)
 
 button_color = "#062546"#"#39acec""#6264d4"
 button_letters_color = "white" 
@@ -108,7 +109,7 @@ class FormularioOperacion:
         frame_mensaje_bienvenida.grid_rowconfigure(0, weight=1)
         frame_mensaje_bienvenida.grid_columnconfigure(0, weight=1)
 
-        label_entrada = tk.Label(frame_mensaje_bienvenida, text="Bienvenido(a) al estacionamiento Amores", font=('Arial', 25), justify='center')
+        label_entrada = tk.Label(frame_mensaje_bienvenida, text=f"Bienvenido(a) al estacionamiento {nombre_estacionamiento}", font=('Arial', 25), justify='center')
         label_entrada.grid(row=0, column=0)
 
 
@@ -252,12 +253,12 @@ class FormularioOperacion:
 
         #creamos un objeto para obtener la lectura de la PROMOCION
         self.promo=tk.StringVar()
-        self.entrypromo=tk.Entry(self.labelpromo, textvariable=self.promo)
+        self.entrypromo=tk.Entry(self.labelpromo, textvariable=self.promo, justify='center')
         self.entrypromo.bind('<Return>',self.CalculaPromocion)#con esto se lee automatico
         self.entrypromo.grid(column=1, row=0, padx=4, pady=4)           
         #este es donde pongo el tipo de PROMOCION
         self.PrTi=tk.StringVar()
-        self.entryPrTi=tk.Entry(self.labelpromo, width=20, textvariable=self.PrTi, state= "readonly")
+        self.entryPrTi=tk.Entry(self.labelpromo, width=20, textvariable=self.PrTi, state= "readonly", justify='center')
         self.entryPrTi.grid(column=1, row=1)
         #botones
 
@@ -272,14 +273,14 @@ class FormularioOperacion:
         self.cambio.grid(column=0, row=2, padx=4, pady=4)
         self.cuantopagasen=tk.StringVar()
         self.cuantopagasen.set(100)
-        self.entrycuantopagasen=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.cuantopagasen)
+        self.entrycuantopagasen=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.cuantopagasen, justify='center')
         #self.entrycuantopagasen.bind('<Return>',self.calcular_cambio)
         self.entrycuantopagasen.grid(column=1, row=0)
         self.elimportees=tk.StringVar()
-        self.entryelimportees=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.elimportees, state="readonly")
+        self.entryelimportees=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.elimportees, state="readonly", justify='center')
         self.entryelimportees.grid(column=1, row=1)
         self.elcambioes=tk.StringVar()
-        self.entryelcambioes=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.elcambioes, state="readonly")
+        self.entryelcambioes=tk.Entry(self.labelcuantopagas, width=15, textvariable=self.elcambioes, state="readonly", justify='center')
         self.entryelcambioes.grid(column=1, row=2)
 
 
@@ -341,7 +342,7 @@ class FormularioOperacion:
         self.lblFOLIO.grid(column=0, row=0, sticky=tk.NW,padx=2, pady=5)
 
         self.PonerFOLIO=tk.StringVar()
-        self.entryPonerFOLIO=tk.Entry(self.label_frame_folio, width=15, textvariable=self.PonerFOLIO, font=("Arial", 11))
+        self.entryPonerFOLIO=tk.Entry(self.label_frame_folio, width=15, textvariable=self.PonerFOLIO, font=("Arial", 11), justify='center')
         self.entryPonerFOLIO.grid(column=1, row=0, sticky=tk.NW,padx=2, pady=5)
 
 
@@ -372,7 +373,7 @@ class FormularioOperacion:
 
         #se crea objeto para ver pedir el folio la etiqueta con texto
         self.folio=tk.StringVar()
-        self.entryfolio=tk.Entry(self.labelframe2, textvariable=self.folio)
+        self.entryfolio=tk.Entry(self.labelframe2, textvariable=self.folio, justify='center')
         self.entryfolio.bind('<Return>',self.consultar)#con esto se lee automatico y se va a consultar
         self.entryfolio.grid(column=1, row=0, padx=4, pady=4)
         #se crea objeto para mostrar el dato de la  Entrada solo lectura
@@ -388,12 +389,12 @@ class FormularioOperacion:
         #creamos un objeto para obtener la lectura de la PROMOCION
         self.promo=tk.StringVar()
         self.promo_auxiliar=tk.StringVar()
-        self.entrypromo=tk.Entry(self.labelpromo, textvariable=self.promo)
+        self.entrypromo=tk.Entry(self.labelpromo, textvariable=self.promo, justify='center')
         self.entrypromo.bind('<Return>',self.CalculaPromocion)#con esto se lee automatico
         self.entrypromo.grid(column=1, row=0, padx=4, pady=4)           
         #este es donde pongo el tipo de PROMOCION
         self.TarifaPreferente=tk.StringVar()
-        self.entryTarifaPreferente=tk.Entry(self.labelpromo, width=20, textvariable=self.TarifaPreferente, state= "readonly")
+        self.entryTarifaPreferente=tk.Entry(self.labelpromo, width=20, textvariable=self.TarifaPreferente, state= "readonly", justify='center')
         self.entryTarifaPreferente.grid(column=1, row=1)
         #botones
 
@@ -520,7 +521,6 @@ class FormularioOperacion:
         self.Placa.set('')
 
         self.BoletoDentro()
-        self.BoletoDentro2()
 
     def consultar(self, event):
         # Vaciar campo de importe
@@ -752,9 +752,9 @@ class FormularioOperacion:
             printer.set(align="left")
 
             printer.text(f'Folio boleto cancelado: {Folio}\n')
-            hoy = datetime.today().strftime("%b-%d-%A-%Y %H:%M:%S")
             printer.text(f'El auto entro: {Entrada}\n')
             printer.text(f'El auto salio: {Salida}\n')
+            printer.text(f'Motivo: {self.motive_cancel.get()}\n')
         else:
             # Seccion de comprobante para pagos normales o boletos perdidos
 
@@ -788,7 +788,7 @@ class FormularioOperacion:
         printer.close()
 
 
-    def GuardarCobro(self):
+    def GuardarCobro(self, motive:str=None):
         """Guarda la informacion de un cobro realizado en la base de datos."""
 
         # Obtener el valor del codigo QR de promocion (si está presente, de lo contrario, será None)
@@ -819,7 +819,7 @@ class FormularioOperacion:
         vobo = "lmf"
 
         # Crear una tupla con los datos del cobro
-        datos = (vobo, importe, TiempoTotal, Entrada, Salida, TarifaPreferente, QRPromo, folio)
+        datos = (motive, vobo, importe, TiempoTotal, Entrada, Salida, TarifaPreferente, QRPromo, folio)
 
         # Guardar el cobro en la base de datos
         self.DB.guardacobro(datos)
@@ -1120,6 +1120,8 @@ class FormularioOperacion:
 
     ###################### Fin de Pagina2 Inicio Pagina3 ###############################
     def listado_completo(self):
+        self.motive_cancel=tk.StringVar()
+
         self.pagina3 = ttk.Frame(self.cuaderno1)
         self.cuaderno1.add(self.pagina3, text="Modulo de Corte")
         self.labelframe1=tk.LabelFrame(self.pagina3, text="Autos")
@@ -1191,28 +1193,16 @@ class FormularioOperacion:
         self.label6=tk.Label(self.labelframe3, text="Fecha y hora del CORTE")
         self.label6.grid(column=0, row=2, padx=1, pady=1)
 
-        self.boton7=tk.Button(self.FrmCancelado, text="B./SIN cobro", command=self.BoletoDentro2, width=12, height=2, anchor="center", background=button_color, fg=button_letters_color)
-        self.boton7.grid(column=0, row=0, padx=1, pady=1)
-
-        self.lblCancelado=tk.Label(self.FrmCancelado, text="COLOCAR FOLIO")
-        self.lblCancelado.grid(column=0, row=1, padx=4, pady=4)
 
         frame_folio_cancelado = tk.Frame(self.FrmCancelado)
         frame_folio_cancelado.grid(column=1, row=1, padx=4, pady=4)
 
-
-        self.FolioCancelado=tk.StringVar()
-        self.entryFOLIOCancelado=tk.Entry(frame_folio_cancelado, width=15, textvariable=self.FolioCancelado)
-        self.entryFOLIOCancelado.grid(column=0, row=0)
-
-        self.btnCancelado=tk.Button(frame_folio_cancelado, text="Cancelar Boleto ", command=self.BoletoCancelado, width=12, height=1, anchor="center", background=button_color, fg=button_letters_color)
+        self.btnCancelado=tk.Button(frame_folio_cancelado, text="Cancelar Boleto ",command=self.BoletoCancelado,width=12, height=2, anchor="center", background=button_color, fg=button_letters_color)
         self.btnCancelado.grid(column=1, row=0)
-        self.scrolledtxt2=st.ScrolledText(self.FrmCancelado, width=26, height=7)
-        self.scrolledtxt2.grid(column=1,row=0, padx=1, pady=1)
 
 
         self.ImporteCorte=tk.StringVar()
-        self.entryImporteCorte=tk.Entry(self.labelframe2, width=20, textvariable=self.ImporteCorte, state= "readonly", borderwidth=5)
+        self.entryImporteCorte=tk.Entry(self.labelframe2, width=20, textvariable=self.ImporteCorte, state= "readonly", borderwidth=5, justify='center')
         self.entryImporteCorte.grid(column=1, row=1)
         self.FechaCorte=tk.StringVar()
         self.entryFechaCorte=tk.Entry(self.labelframe2, width=20, textvariable=self.FechaCorte, state= "readonly")
@@ -1272,13 +1262,7 @@ class FormularioOperacion:
         width=15, height=1, anchor="center", background=button_color, fg=button_letters_color)
         self.boton_usuarios.grid(column=0, row=0, padx=4, pady=4)
 
-        self.BoletoDentro2()
 
-    def BoletoDentro2(self):
-        respuesta=self.DB.Autos_dentro()
-        self.scrolledtxt2.delete("1.0", tk.END)
-        for fila in respuesta:
-            self.scrolledtxt2.insert(tk.END, "Folio num: "+str(fila[0])+"\nEntro: "+str(fila[1])[:-3]+"\nPlacas: "+str(fila[2])+"\n\n")
 
 
     def desglose_cobrados(self):
@@ -1287,88 +1271,142 @@ class FormularioOperacion:
         Numcorte=str(Numcorte)
 
         respuesta=self.DB.desglose_cobrados(Numcorte)
-        self.scrolledtxt2.delete("1.0", tk.END)
+
         printer = Usb(0x04b8, 0x0202, 0)
         printer.text("El Numero de corte es "+Numcorte+'\n')
         for fila in respuesta:
-            self.scrolledtxt2.insert(tk.END, str(fila[0])+" Boletos con tarifa "+str(fila[1])+"\n"+"valor c/u $"+str(fila[2])+" Total $"+str(fila[3])+"\n\n")
-
             printer.text(f"  {str(fila[0])}  -  {str(fila[1])}  -  ${str(fila[2])}   -  ${str(fila[3])}\n")
 
         printer.cut()
         printer.close()
 
+
     def BoletoCancelado(self):
-        """
-        Esta funcion cancela un boleto específico.
+        self.desactivar()
+        # Crear la ventana principal
+        self.cancel_window = tk.Toplevel()
+        self.cancel_window.title("Cancelar Boleto")
 
-        Verifica si se ha ingresado un número de folio para cancelar y muestra una advertencia para confirmar la cancelacion.
-        Si se confirma la cancelacion, obtiene los datos del boleto cancelado y realiza las operaciones correspondientes.
-        Muestra informacion relevante del boleto cancelado y guarda el registro del cobro cancelado.
+        # Se elimina la funcionalidad del boton de cerrar
+        self.cancel_window.protocol("WM_DELETE_WINDOW", lambda: {self.activar(),self.cancel_window.destroy()})
 
-        :param self: Objeto de la clase que contiene los atributos y métodos necesarios.
+        # Elevar la ventana secundaria al frente de todas las otras ventanas
+        self.cancel_window.lift()
 
-        :return: None
-        """
+        # Colocar el LabelFrame en las coordenadas calculadas
+        principal_frame_cancel = tk.LabelFrame(self.cancel_window)
+        principal_frame_cancel.pack(expand=True, padx=5, pady=5, anchor='n')
 
-        if len(self.FolioCancelado.get()) == 0:
-            mb.showerror("Error", "Ingrese un folio a cancelar")
-            self.entryFOLIOCancelado.focus()
-            return
+        labelframe_cancelar_boleto=tk.LabelFrame(principal_frame_cancel, text="Cancelar Boleto")
+        labelframe_cancelar_boleto.grid(column=0, row=0, padx=5, pady=5)
 
-        cancelar = mb.askokcancel("Advertencia", f"¿Estas seguro de querer cancelar el boleto con folio: {self.FolioCancelado.get()}?")
+        labelframe_cancelar_boleto_folio=tk.Frame(labelframe_cancelar_boleto)
+        labelframe_cancelar_boleto_folio.grid(column=0, row=0, padx=5, pady=5)
 
-        if cancelar == False:
+        etiqueta = tk.Label(labelframe_cancelar_boleto_folio, text="Ingresa el Folio a cancelar: ", font=font_cancel)
+        etiqueta.grid(column=0, row=0, padx=2, pady=2)
+
+        self.FolioCancelado=tk.StringVar()
+        self.entry_folio_cancelado=tk.Entry(labelframe_cancelar_boleto_folio, width=10, textvariable=self.FolioCancelado, justify='center', font=font_cancel)
+        self.entry_folio_cancelado.grid(column=1, row=0, padx=2, pady=2)
+        self.entry_folio_cancelado.focus()
+
+
+        # Crear una etiqueta
+        etiqueta = tk.Label(labelframe_cancelar_boleto, text="Ingresa el motivo de la cancelación del boleto", font=font_cancel)
+        etiqueta.grid(column=0, row=1, padx=2, pady=5)
+
+        self.EntryMotive_Cancel = tk.Entry(labelframe_cancelar_boleto, font=font_cancel, width=30, textvariable=self.motive_cancel, justify='center')
+        self.EntryMotive_Cancel.grid(column=0, row=2, padx=2, pady=2)
+
+        # Crear un botón para obtener el texto
+        boton = tk.Button(labelframe_cancelar_boleto, text="Cancelar Boleto", command=lambda:cancelar_boleto(), background=button_color, fg=button_letters_color, width=15, height=2, font=font_cancel)
+        boton.grid(column=0, row=3, padx=2, pady=2)
+
+        labelframe_lista_boletos=tk.LabelFrame(principal_frame_cancel, text="Lista de boletos")
+        labelframe_lista_boletos.grid(column=1, row=0, padx=5, pady=5)
+
+        self.boton7=tk.Button(labelframe_lista_boletos, text="Actualizar", command=lambda:boletos_dentro(), width=12, height=1, background=button_color, fg=button_letters_color, font=font_cancel)
+        self.boton7.grid(column=0, row=0, padx=1, pady=1)
+
+        scroller_boletos_dentro=st.ScrolledText(labelframe_lista_boletos, width=25, height=8)
+        scroller_boletos_dentro.grid(column=0,row=1, padx=2, pady=2)
+
+        def boletos_dentro():
+            respuesta=self.DB.Autos_dentro()
+            scroller_boletos_dentro.delete("1.0", tk.END)
+            for fila in respuesta:
+                scroller_boletos_dentro.insert(tk.END, "Folio num: "+str(fila[0])+"\nEntro: "+str(fila[1])[:-3]+"\nPlacas: "+str(fila[2])+"\n\n")
+
+        boletos_dentro()
+
+        def cancelar_boleto():
+            folio = self.FolioCancelado.get()
+            if not folio:
+                mb.showerror("Error", "Ingrese un folio a cancelar")
+                self.entry_folio_cancelado.focus()
+                return
+
+            motive_cancel = self.motive_cancel.get()
+            if not motive_cancel:
+                mb.showerror("Error", "Ingresa el motivo por el cual se esta cancelando el boleto")
+                self.EntryMotive_Cancel.focus()
+                return 
+
+            cancelar = mb.askokcancel("Advertencia", f"¿Estas seguro de querer cancelar el boleto con folio: {self.FolioCancelado.get()}?")
+            if cancelar == False:
+                self.FolioCancelado.set("")
+                self.entry_folio_cancelado.focus()
+                return
+
+            self.folio.set(folio)
+
+            folio = self.folio.get()
+            respuesta = self.DB.consulta(folio)
+
+            if len(respuesta) == 0:
+                self.fecha_entrada.set('')
+                self.fecha_salida.set('')
+                self.motive_cancel.set("")
+                self.FolioCancelado.set("")
+                self.folio.set("")
+                mb.showinfo("Informacion", "No existe un auto con dicho codigo")
+                self.entry_folio_cancelado.focus()
+                return
+
+
+            Salida = respuesta[0][1]
+            Placas = respuesta[0][6]
+
+            if Salida is not None:
+                self.motive_cancel.set("")
+                self.FolioCancelado.set("")
+                self.folio.set("")
+                mb.showerror("Error", "No se puede cancelar un boleto ya cobrado")
+                self.entry_folio_cancelado.focus()
+                return
+
+            if Placas == "BoletoPerdido":
+                mb.showerror("Error", "El folio ingresado corresponde a una reposicion de un boleto perdido, no se puede cancelar.")
+                self.motive_cancel.set("")
+                self.FolioCancelado.set("")
+                self.folio.set("")
+                return
+
+            Entrada = str(respuesta[0][0])
+            self.fecha_entrada.set(Entrada)
+            self.CalculaPermanencia()
+            importe = 0
+
+            # Establecer el importe y mostrarlo
+            self.mostrar_importe(importe)
+            self.TarifaPreferente.set("CDO")
+            self.GuardarCobro(motive_cancel)
+            self.Comprobante(titulo='Boleto Cancelado', imagen_logo=False)
             self.FolioCancelado.set("")
-            self.entryFOLIOCancelado.focus()
-            return
-
-        folio = self.FolioCancelado.get()
-        self.folio.set(folio)
-
-        folio = self.folio.get()
-        respuesta = self.DB.consulta(folio)
-
-        if len(respuesta) == 0:
-            self.fecha_entrada.set('')
-            self.fecha_salida.set('')
-            mb.showinfo("Informacion", "No existe un auto con dicho codigo")
-            return
-
-        Salida = respuesta[0][1]
-        Placas = respuesta[0][6]
-
-        if Salida is not None:
-            self.FolioCancelado.set("")
-            self.folio.set("")
-            mb.showerror("Error", "No se puede cancelar un boleto ya cobrado")
-            return
-
-        if Placas == "BoletoPerdido":
-            mb.showerror("Error", "El folio ingresado corresponde a una reposicion de un boleto perdido, no se puede cancelar.")
-            self.FolioCancelado.set("")
-            self.folio.set("")
-            return
-
-        Entrada = str(respuesta[0][0])
-        self.fecha_entrada.set(Entrada)
-
-        self.CalculaPermanencia()
-
-        importe = 0
-
-        # Establecer el importe y mostrarlo
-        self.mostrar_importe(importe)
-
-        self.TarifaPreferente.set("CDO")
-
-        self.GuardarCobro()
-
-        self.Comprobante(titulo='Boleto Cancelado', imagen_logo=False)
-
-        self.FolioCancelado.set("")
-
-        self.limpiar_campos()
+            self.limpiar_campos()
+            self.cancel_window.destroy()
+            self.activar()
 
 
     def listar(self):
@@ -1556,15 +1594,10 @@ class FormularioOperacion:
         Numcorte=str(Numcorte)
 
         respuesta=self.DB.desglose_cobrados(Numcorte)
-        self.scrolledtxt2.delete("1.0", tk.END)
-
-
 
         printer.text("Cantidad e Importes "+'\n')
         printer.text("Cantidad - Tarifa - valor C/U - Total "+'\n')
         for fila in respuesta:
-            self.scrolledtxt2.insert(tk.END, str(fila[0])+" Boletos con tarifa "+str(fila[1])+"\n"+"valor c/u $"+str(fila[2])+" Total $"+str(fila[3])+"\n\n")
-
             printer.text(f"  {str(fila[0])}  -  {str(fila[1])}  -  ${str(fila[2])}   -  ${str(fila[3])}\n")
 
         else:
@@ -1572,6 +1605,14 @@ class FormularioOperacion:
             printer.text(f"{BolCobrImpresion} Boletos        Suma total ${Im38}\n\n")    
 
         printer.text("----------------------------------\n")
+
+        desgloce_cancelados = self.DB.desgloce_cancelados(ponercorte)
+        if len(desgloce_cancelados) > 0:
+            printer.text("Boletos cancelados\n\n")
+
+            for boleto in desgloce_cancelados:
+                printer.text(f"Folio:{boleto[0]} - Motivo: {boleto[1]}\n")
+            printer.text("----------------------------------\n\n")
 
         Entradas_Totales_Pensionados = self.controlador_crud_pensionados.get_Entradas_Totales_Pensionados(ponercorte)
         Salidas_Pensionados = self.controlador_crud_pensionados.get_Salidas_Pensionados(ponercorte)
@@ -1593,7 +1634,6 @@ class FormularioOperacion:
             printer.text(f"Quedados: {Quedados}\n")
 
             printer.text("----------------------------------\n\n")
-
 
         # Obtiene la cantidad de boletos perdidos generados
         Boletos_perdidos_generados = self.DB.Boletos_perdidos_generados()
@@ -1654,6 +1694,8 @@ class FormularioOperacion:
             else:
                 printer.text("----------------------------------\n")
 
+        # Imprime ultimo separador
+        printer.text("----------------------------------\n")
 
         # Corta el papel
         printer.cut()
@@ -1846,7 +1888,7 @@ class FormularioOperacion:
         lbldatos20=tk.Label(labelframe_pensionados_datos_pago__, text="Num. Tarjeta:")
         lbldatos20.grid(column=0, row=0, padx=4, pady=4)
         self.variable_numero_tarjeta=tk.StringVar()
-        self.caja_texto_numero_tarjeta=ttk.Entry(labelframe_pensionados_datos_pago__, width=15, textvariable=self.variable_numero_tarjeta)
+        self.caja_texto_numero_tarjeta=ttk.Entry(labelframe_pensionados_datos_pago__, width=15, textvariable=self.variable_numero_tarjeta, justify='center')
         self.caja_texto_numero_tarjeta.grid(column=1, row=0, padx=4, pady=4)
 
         boton_consultar_pensionado=tk.Button(labelframe_pensionados_datos_pago__, text="Consultar", command=self.ConsulPagoPen, width=12, height=1, anchor="center",  font=("Arial", 10), background=button_color, fg=button_letters_color)
@@ -1855,7 +1897,7 @@ class FormularioOperacion:
         lbldatos16=tk.Label(labelframe_pensionados_datos_pago__, text="Monto Mensual:")#informativo
         lbldatos16.grid(column=0, row=1, padx=4, pady=4)
         self.Monto=tk.StringVar()
-        entryMonto=ttk.Entry(labelframe_pensionados_datos_pago__, width=10, textvariable=self.Monto, state="readonly")
+        entryMonto=ttk.Entry(labelframe_pensionados_datos_pago__, width=10, textvariable=self.Monto, state="readonly", justify='center')
         entryMonto.grid(column=1, row=1)
 
         etiqueta_vigencia=tk.Label(labelframe_pensionados_datos_pago__, text="Vigencia:")
@@ -1876,7 +1918,7 @@ class FormularioOperacion:
         etiqueta_estatus=tk.Label(labelframe_pensionados_datos_pago__, text="Estatus:")
         etiqueta_estatus.grid(column=3, row=2, padx=4, pady=4)  
         self.Estatus=tk.StringVar()
-        cata_texto_estatus=ttk.Entry(labelframe_pensionados_datos_pago__, width=15, textvariable=self.Estatus, state="readonly")
+        cata_texto_estatus=ttk.Entry(labelframe_pensionados_datos_pago__, width=15, textvariable=self.Estatus, state="readonly", justify='center')
         cata_texto_estatus.grid(column=4, row=2, padx=4, pady=4)
 
         label_frame_informacion = tk.Frame(labelframe_pensionados_datos_pago)
@@ -1930,7 +1972,7 @@ class FormularioOperacion:
         lbldatos21.grid(column=0, row=0, padx=4, pady=4)
 
         self.variable_contraseña_pensionados=tk.StringVar()
-        self.campo_texto_contraseña_pensionados=ttk.Entry(labelframe_pensionados_acciones_contraseña, width=20, textvariable=self.variable_contraseña_pensionados, show="*", font=("Arial", 10))
+        self.campo_texto_contraseña_pensionados=ttk.Entry(labelframe_pensionados_acciones_contraseña, width=20, textvariable=self.variable_contraseña_pensionados, show="*", font=("Arial", 10), justify='center')
         self.campo_texto_contraseña_pensionados.grid(column=1, row=0, padx=4, pady=4)
 
        
@@ -2533,9 +2575,9 @@ class FormularioOperacion:
         self.TarifaPreferente.set("")
         self.IImporte.config(text="")
         self.folio_auxiliar = None
+        self.motive_cancel.set("")
         self.entryfolio.focus()
         self.BoletoDentro()
-        self.BoletoDentro2()
 
 
     def vaciar_tabla(self):
@@ -2998,8 +3040,8 @@ class FormularioOperacion:
 
         # Comprobar si la pestaña actual es la que se desea
         elif current_tab_index == 2:
-            # Hacer focus en el widget deseado
-            self.entryFOLIOCancelado.focus_set()
+            self.Calcular_Corte()
+            self.Puertoycontar()
 
         # Comprobar si la pestaña actual es la que se desea
         elif current_tab_index == 3:

@@ -30,10 +30,18 @@ class Operacion:
     def guardacobro(self, datos):
         cone=self.abrir()
         cursor=cone.cursor()
-        sql = "update Entradas set vobo = %s, Importe = %s, TiempoTotal = %s, Entrada = %s, Salida = %s,TarifaPreferente = %s, QRPromo = %s where id = %s;"
+        sql = "update Entradas set Motivo = %s, vobo = %s, Importe = %s, TiempoTotal = %s, Entrada = %s, Salida = %s,TarifaPreferente = %s, QRPromo = %s where id = %s;"
         cursor.execute(sql, datos)
         cone.commit()
         cone.close()
+
+    def desgloce_cancelados(self, corte):
+        cone = self.abrir()
+        cursor = cone.cursor()
+        query = f"SELECT id, Motivo FROM Entradas WHERE TarifaPreferente = 'CDO' AND CorteInc = {corte}"
+        cursor.execute(query)
+        cone.close()
+        return cursor.fetchall()
 
     def ValidaPromo(self, datos):
         cone=self.abrir()
