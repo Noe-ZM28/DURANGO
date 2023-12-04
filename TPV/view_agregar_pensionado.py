@@ -226,6 +226,7 @@ class View_agregar_pensionados:
         print("imprime QR")
         printer.text("-" * 30 + "\n")
         printer.text(f"Placas: {self.variable_placas.get()}\n")
+        printer.text(f"Modelo: {self.variable_auto_modelo.get()}\n")
         printer.text(f"Nombre: {self.variable_nombre.get()}\n")
         printer.text(f"ID: {QR}\n")
         printer.cut()
